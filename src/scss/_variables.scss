@@ -1,0 +1,45 @@
+// Algo Atelier 設計變數
+
+// 基礎色系
+$canvas: #0b0d0c;
+$surface: #121513;
+$surface-raised: #191d1a;
+$border: #2a302b;
+$text-primary: #f3f5ef;
+$text-muted: #9ca69e;
+
+// 強調色與演算法視覺化狀態色
+$accent-lime: #b6f36a;
+$accent-lime-dim: #26371c;
+$accent-cyan: #70e1d1;
+$accent-pink: #ff8ea1;
+$accent-amber: #f7c66d;
+
+// 應用程式使用的語意化色彩別名
+$color-background: $canvas;
+$color-panel: $surface;
+$color-panel-raised: $surface-raised;
+$color-divider: $border;
+$color-foreground: $text-primary;
+$color-foreground-muted: $text-muted;
+$color-primary: $accent-lime;
+$color-primary-soft: $accent-lime-dim;
+$color-sorted: $accent-cyan;
+$color-comparing: $accent-pink;
+$color-warning: $accent-amber;
+
+// 字體
+$font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+$font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+// 桌機版與手機版畫面共用尺寸
+$radius-sm: 10px;
+$radius-md: 12px;
+$radius-lg: 14px;
+$radius-pill: 999px;
+$border-width: 1px;
+$header-height: 72px;
+$control-height: 120px;
+
+// 響應式設計斷點
+$breakpoint-mobile: 768px;
