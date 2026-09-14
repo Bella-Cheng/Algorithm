@@ -1,0 +1,109 @@
+.tool-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 20px;
+  padding-inline: 32px;
+  border-bottom: $border-width solid $border;
+  background: $canvas;
+
+  &__meta {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  &__index {
+    flex-shrink: 0;
+    color: $color-primary;
+    font-family: $font-mono;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  &__title {
+    overflow: hidden;
+    margin: 0;
+    color: $text-primary;
+    font-size: 30px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__subtitle {
+    flex-shrink: 0;
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__stats {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__chip {
+    display: inline-flex;
+    height: 36px;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 14px;
+    border: $border-width solid $border;
+    border-radius: $radius-pill;
+    background: $surface;
+  }
+
+  &__chip-label {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__chip-value {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__chip--status {
+    border-color: transparent;
+  }
+
+  &__chip--primary {
+    background: $color-primary-soft;
+  }
+
+  &__chip--comparing {
+    background: rgba($accent-pink, 0.16);
+  }
+
+  &__chip--warning {
+    background: rgba($accent-amber, 0.16);
+  }
+
+  &__chip--primary .tool-header__chip-label,
+  &__chip--primary .tool-header__chip-value {
+    color: $color-primary;
+  }
+
+  &__chip--comparing .tool-header__chip-label,
+  &__chip--comparing .tool-header__chip-value {
+    color: $color-comparing;
+  }
+
+  &__chip--warning .tool-header__chip-label,
+  &__chip--warning .tool-header__chip-value {
+    color: $color-warning;
+  }
+}
