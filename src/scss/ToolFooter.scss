@@ -1,0 +1,136 @@
+.tool-footer {
+  display: flex;
+  height: $control-height;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 24px;
+  padding-inline: 32px;
+  border-top: $border-width solid $border;
+  background: $canvas;
+
+  &__controls {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__icon-btn {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border: $border-width solid $border;
+    border-radius: 50%;
+    background: $surface;
+    color: $text-muted;
+    cursor: pointer;
+    font-size: 16px;
+
+    &:hover {
+      color: $text-primary;
+    }
+  }
+
+  &__play-btn {
+    display: inline-flex;
+    height: 40px;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 22px;
+    border: none;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    color: $canvas;
+    cursor: pointer;
+    font-family: $font-mono;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  &__play-icon {
+    font-size: 11px;
+  }
+
+  &__progress {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__progress-label {
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__progress-track {
+    overflow: hidden;
+    height: 4px;
+    border-radius: $radius-pill;
+    background: $surface;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    border-radius: $radius-pill;
+    background: $color-primary;
+  }
+
+  &__step-count {
+    flex-shrink: 0;
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__speed {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__speed-label {
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__speed-btn {
+    display: inline-flex;
+    height: 32px;
+    min-width: 44px;
+    align-items: center;
+    justify-content: center;
+    border: $border-width solid $border;
+    border-radius: $radius-pill;
+    background: $surface;
+    color: $text-muted;
+    cursor: pointer;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+
+    &--active {
+      border-color: transparent;
+      background: $color-primary;
+      color: $canvas;
+    }
+  }
+}

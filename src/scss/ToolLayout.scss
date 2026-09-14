@@ -1,0 +1,33 @@
+.tool-layout {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+
+  &__body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &__sidebar {
+    flex-shrink: 0;
+    width: 280px;
+    background: $canvas;
+
+    &--left {
+      border-right: $border-width solid $border;
+    }
+
+    &--right {
+      width: 360px;
+      border-left: $border-width solid $border;
+    }
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    background: $surface;
+  }
+}
