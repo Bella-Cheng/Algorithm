@@ -1,0 +1,51 @@
+.bar-chart {
+  padding: 24px 28px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__content {
+    padding: 24px 28px;
+  }
+
+  &__bars {
+    display: flex;
+    align-items: flex-end; // 柱子從底部往上長
+    gap: 8px;
+    height: 300px; // 需要明確高度，子層的 % 高度才算得出來
+    padding-top: 24px; // 預留最高柱子上方數字的空間
+  }
+
+  &__bar {
+    position: relative;
+    flex: 1;
+    background-color: #4f8cff;
+    transition: height 0.3s ease;
+
+    &__label {
+      font-size: 13px;
+      font-weight: 500;
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &__index {
+      color: $text-muted;
+      font-size: 10px;
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  &__footer {
+    background-color: $color-panel;
+  }
+}
+
+
