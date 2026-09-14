@@ -1,0 +1,76 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: $header-height;
+  padding-inline: 32px;
+  border-bottom: $border-width solid $border;
+  background: $canvas;
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: $text-primary;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  &__logo {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-sm;
+    color: $canvas;
+    background: $accent-lime;
+    font-family: $font-mono;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &__title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  &__link {
+    color: $text-muted;
+    font-size: 14px;
+
+    &:hover {
+      color: $text-primary;
+      text-decoration: none;
+    }
+
+    &--disabled {
+      cursor: default;
+      pointer-events: none;
+    }
+  }
+
+  &__badge {
+    display: inline-flex;
+    height: 32px;
+    align-items: center;
+    padding-inline: 16px;
+    border-radius: $radius-pill;
+    color: $canvas;
+    background: $accent-lime;
+    font-family: $font-mono;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}

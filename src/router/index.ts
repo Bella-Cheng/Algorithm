@@ -5,9 +5,6 @@ const routes = [
     path: '/',
     name: 'BubbleSort',
     component: () => import('@/page/BubbleSort.vue'),
-    meta: {
-      algorithmName: 'BUBBLE SORT',
-    },
   },
 ]
 
