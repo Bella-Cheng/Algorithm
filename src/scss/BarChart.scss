@@ -1,51 +1,126 @@
 .bar-chart {
-  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  padding: 28px 32px;
 
   &__header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
   }
 
+  &__title {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__step {
+    padding: 8px 18px;
+    border-radius: $radius-pill;
+    background: $surface-raised;
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   &__content {
-    padding: 24px 28px;
+    display: flex;
+    flex: 1;
+    align-items: flex-end;
+    padding: 24px 28px 56px; // 底部預留數字與 index 的空間
   }
 
   &__bars {
     display: flex;
+    width: 100%;
     align-items: flex-end; // 柱子從底部往上長
-    gap: 8px;
-    height: 300px; // 需要明確高度，子層的 % 高度才算得出來
-    padding-top: 24px; // 預留最高柱子上方數字的空間
+    gap: 36px;
+    height: 360px; // 需要明確高度，子層的 % 高度才算得出來
   }
 
   &__bar {
     position: relative;
     flex: 1;
-    background-color: #4f8cff;
-    transition: height 0.3s ease;
+    border-radius: $radius-sm;
+    background-color: $border;
+    transition:
+      height 0.3s ease,
+      background-color 0.2s ease;
 
     &__label {
-      font-size: 13px;
-      font-weight: 500;
       position: absolute;
       bottom: -30px;
       left: 50%;
       transform: translateX(-50%);
+      font-family: $font-mono;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s ease;
     }
 
     &__index {
-      color: $text-muted;
-      font-size: 10px;
       position: absolute;
       bottom: -50px;
       left: 50%;
       transform: translateX(-50%);
+      color: $text-muted;
+      font-family: $font-mono;
+      font-size: 10px;
+    }
+
+    // 已排好順序
+    &--sorted {
+      background-color: $accent-cyan;
+    }
+
+    // 正在選中（往右冒泡的較大值）
+    &--active {
+      background-color: $accent-lime;
+
+      .bar-chart__bar__label {
+        color: $accent-lime;
+      }
+    }
+
+    // 被選中比較
+    &--comparing {
+      background-color: $accent-pink;
+
+      .bar-chart__bar__label {
+        color: $accent-pink;
+      }
     }
   }
 
   &__footer {
-    background-color: $color-panel;
+    display: flex;
+    min-height: 96px;
+    gap: 40px;
+    padding: 20px 28px;
+    border: $border-width solid $border;
+    border-radius: $radius-md;
+    background-color: $canvas;
+
+    &__step {
+      flex-shrink: 0;
+      color: $accent-lime;
+      font-family: $font-mono;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+
+    &__info {
+      color: $text-primary;
+      font-size: 14px;
+      line-height: 1.7;
+    }
   }
 }
-
-

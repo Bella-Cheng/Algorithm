@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import ToolFooter from '@/component/ToolFooter.vue'
-</script>
-
 <template>
   <div class="tool-layout">
     <div class="tool-layout__body">
@@ -18,7 +14,7 @@ import ToolFooter from '@/component/ToolFooter.vue'
       </aside>
     </div>
 
-    <ToolFooter />
+    <slot name="footer" />
   </div>
 </template>
 

@@ -1,0 +1,103 @@
+.code-panel {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  background: $surface;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 20px;
+    border-bottom: $border-width solid $border;
+  }
+
+  &__file {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__language {
+    padding: 6px 16px;
+    border-radius: $radius-pill;
+    background: $surface-raised;
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  &__body {
+    flex: 1;
+    overflow-x: auto;
+    margin: 0;
+    padding: 16px 0;
+    list-style: none;
+  }
+
+  &__line {
+    display: flex;
+    min-width: max-content; // 長行時整列背景跟著延伸
+    gap: 16px;
+    padding: 9px 20px;
+    font-family: $font-mono;
+    font-size: 12px;
+    line-height: 1.6;
+    transition: background-color 0.2s ease;
+
+    &--active {
+      background: $accent-lime-dim;
+
+      .code-panel__line-no {
+        color: $accent-lime;
+      }
+    }
+  }
+
+  &__line-no {
+    flex-shrink: 0;
+    color: $text-muted;
+  }
+
+  &__code {
+    color: $text-primary;
+    white-space: pre;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-top: $border-width solid $border;
+    background: $surface-raised;
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: $accent-lime;
+    font-family: $font-mono;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  &__status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $accent-lime;
+  }
+
+  &__meta {
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 11px;
+  }
+}

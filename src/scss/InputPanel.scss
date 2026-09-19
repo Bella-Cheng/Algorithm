@@ -1,0 +1,130 @@
+.input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  padding: 28px 22px;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__title {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__data {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    border: $border-width solid $border;
+    border-radius: $radius-md;
+    background: $surface;
+  }
+
+  &__data-label {
+    color: $text-muted;
+    font-size: 12px;
+  }
+
+  &__data-values {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  &__generate {
+    display: inline-flex;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border: none;
+    border-radius: $radius-pill;
+    background: $surface;
+    color: $text-primary;
+    font-size: 13px;
+    font-weight: 700;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+
+    &:hover {
+      background: $accent-lime-dim;
+      color: $accent-lime;
+    }
+  }
+
+  &__step {
+    display: flex;
+    min-height: 144px;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 16px;
+    border-radius: $radius-md;
+    background: $accent-lime-dim;
+  }
+
+  &__step-label {
+    color: $accent-lime;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  &__step-text {
+    color: $text-primary;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-line; // 支援步驟說明中的換行
+  }
+
+  &__legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: $text-muted;
+    font-size: 13px;
+  }
+
+  &__legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: $border;
+
+    &--active {
+      background: $accent-lime;
+    }
+
+    &--comparing {
+      background: $accent-pink;
+    }
+
+    &--sorted {
+      background: $accent-cyan;
+    }
+
+    &--default {
+      background: $border;
+    }
+  }
+}

@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { BarState } from '@/types/sort'
 
 const props = withDefaults(
   defineProps<{
     /** 要顯示的數字陣列 */
     arr?: number[]
+    /** 每根長條的狀態，與 arr 一一對應 */
+    barStates?: BarState[]
+    /** 標題列右側的名稱，如 BUBBLE SORT */
+    title?: string
     currentStep?: number
     totalSteps?: number
+    /** 下方說明框的文字 */
+    message?: string
   }>(),
   {
     arr: () => [],
+    barStates: () => [],
+    title: 'BAR CHART',
     currentStep: 0,
     totalSteps: 0,
+    message: '',
   },
 )
 
@@ -24,31 +34,16 @@ function getBarHeight(value: number) {
   return `${(value / maxValue.value) * 100}%`
 }
 
-// function bubbleSort(arr: number[]) {
-
-//   if (arr.length == 0) return
-
-//   let temp = 0;
-
-//   for (let j = arr.length; j > 1; j--) {
-
-//     for (let i = 0; i < j - 1; i++) {
-//       if (arr[i] > arr[i + 1]) {
-//         temp = arr[i];
-//         arr[i] = arr[i + 1];
-//         arr[i + 1] = temp;
-//       }
-//     }
-//   }
-// }
-
+function padStep(step: number) {
+  return String(step).padStart(2, '0')
+}
 </script>
 
 <template>
   <div class="bar-chart">
     <div class="bar-chart__header">
-      <span>VISUALIZATION / BAR CHART</span>
-      <span>STEP {{ currentStep }} / {{ totalSteps }}</span>
+      <span class="bar-chart__title">VISUALIZATION / {{ title }}</span>
+      <span class="bar-chart__step">STEP {{ padStep(currentStep) }} / {{ padStep(totalSteps) }}</span>
     </div>
 
     <div class="bar-chart__content">
@@ -57,6 +52,7 @@ function getBarHeight(value: number) {
           v-for="(value, index) in arr"
           :key="index"
           class="bar-chart__bar"
+          :class="`bar-chart__bar--${barStates[index] ?? 'default'}`"
           :style="{ height: getBarHeight(value) }"
         >
           <span class="bar-chart__bar__label">{{ value }}</span>
@@ -66,12 +62,10 @@ function getBarHeight(value: number) {
     </div>
 
     <div class="bar-chart__footer">
-      <span></span>
-      <div class="bar-chart__footer__info"></div>
+      <span class="bar-chart__footer__step">{{ padStep(currentStep) }}</span>
+      <p class="bar-chart__footer__info">{{ message }}</p>
     </div>
   </div>
-
-
 </template>
 
 <style scoped lang="scss" src="@/scss/BarChart.scss"></style>

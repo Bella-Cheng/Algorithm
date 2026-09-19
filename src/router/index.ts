@@ -4,7 +4,7 @@ const routes = [
   {
     path: '/',
     name: 'BubbleSort',
-    component: () => import('@/page/BubbleSort.vue'),
+    component: () => import('@/page/BubbleSortPage.vue'),
   },
 ]
 
