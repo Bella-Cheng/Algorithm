@@ -18,7 +18,7 @@ src/layout/
 
 Header 是全站唯一、每頁都存在的頂部 chrome，因此只需要一個頂層 layout（MainLayout）負責渲染它，不需要兩個互斥的頂層 layout 各自重複渲染 header。
 
-`ToolHeader` 跟 `ToolLayout` 是分開的：`ToolHeader` 放在各演算法頁面（如 `src/page/BubbleSort.vue`）裡使用，不放進 `ToolLayout`。原因見「設計決策：ToolHeader 為什麼不放進 ToolLayout」。
+`ToolHeader` 跟 `ToolLayout` 是分開的：`ToolHeader` 放在各演算法頁面（如 `src/page/BubbleSortPage.vue`）裡使用，不放進 `ToolLayout`。原因見「設計決策：ToolHeader 為什麼不放進 ToolLayout」。
 
 ## Header.vue 設計重點
 
@@ -37,7 +37,7 @@ Header 是全站唯一、每頁都存在的頂部 chrome，因此只需要一個
 ## MainLayout.vue 設計重點
 
 - 極簡結構：`<Header /> <router-view />`
-- `.main-layout` 為 `flex; flex-direction: column; min-height: 100vh`，`.main-layout__content` 補上 `display: flex; flex-direction: column; min-height: 0`，讓 `<RouterView />` 渲染出來的頁面（如 `BubbleSort.vue`）可以用 `flex: 1` 撐滿剩餘高度，`ToolFooter` 才會貼齊視窗底部而不是浮在內容下面
+- `.main-layout` 為 `flex; flex-direction: column; min-height: 100vh`，`.main-layout__content` 補上 `display: flex; flex-direction: column; min-height: 0`，讓 `<RouterView />` 渲染出來的頁面（如 `BubbleSortPage.vue`）可以用 `flex: 1` 撐滿剩餘高度，`ToolFooter` 才會貼齊視窗底部而不是浮在內容下面
 - `App.vue` 直接渲染 `<MainLayout />`
 
 ## ToolHeader.vue 設計重點
@@ -65,7 +65,7 @@ Props：
 | `comparing` | `rgba($accent-pink, 0.16)` | `$color-comparing`（粉紅） | STABLE NO |
 | `warning` | `rgba($accent-amber, 0.16)` | `$color-warning`（琥珀） | WEIGHT ≥ 0 等非穩定排序的替代指標 |
 
-使用範例（`src/page/BubbleSort.vue`）：
+使用範例（`src/page/BubbleSortPage.vue`）：
 
 ```vue
 <ToolHeader
@@ -106,7 +106,7 @@ Props：
 
 - 結構：`左側欄位（slot #left）` + `主內容（預設 slot）` + `右側欄位（slot #right）`，下方接 `ToolFooter`
 - 左右欄位**目前只搭版面，不放內容**（寬度分別 280px / 360px，用邊框跟主內容區隔），對應截圖左側 INPUT DATA 面板與右側程式碼面板的位置，實際內容留給之後的頁面開發
-- 不透過巢狀路由實作，而是頁面元件（如 `BubbleSort.vue`）直接引用 `ToolLayout` 並用 slot 組合內容
+- 不透過巢狀路由實作，而是頁面元件（如 `BubbleSortPage.vue`）直接引用 `ToolLayout` 並用 slot 組合內容
 
 使用範例：
 
