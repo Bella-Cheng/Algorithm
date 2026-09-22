@@ -1,5 +1,18 @@
-/** 長條圖的顯示狀態 */
-export type BarState = 'default' | 'active' | 'comparing' | 'sorted'
+/**
+ * 長條圖的顯示狀態
+ * - active（lime）：正在處理的元素，快速排序中代表 pivot
+ * - comparing（pink）：正在被比較的元素
+ * - less（cyan）：比 pivot 小的元素
+ * - greater（text muted）：比 pivot 大的元素
+ * - sorted（cyan）：已排好或已固定在最終位置
+ */
+export type BarState = 'default' | 'active' | 'comparing' | 'less' | 'greater' | 'sorted'
+
+/** 左側面板的顏色圖例 */
+export interface LegendItem {
+  state: BarState
+  label: string
+}
 
 /** 排序動畫的單一步驟快照 */
 export interface SortStep<Phase extends string = string> {

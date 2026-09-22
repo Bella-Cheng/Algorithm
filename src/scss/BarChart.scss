@@ -75,9 +75,27 @@
       font-size: 10px;
     }
 
-    // 已排好順序
+    // 已排好順序 / 已固定在最終位置
     &--sorted {
       background-color: $accent-cyan;
+    }
+
+    // 比 pivot 小
+    &--less {
+      background-color: $accent-cyan;
+
+      .bar-chart__bar__label {
+        color: $accent-cyan;
+      }
+    }
+
+    // 比 pivot 大
+    &--greater {
+      background-color: $text-muted;
+
+      .bar-chart__bar__label {
+        color: $text-muted;
+      }
     }
 
     // 正在選中（往右冒泡的較大值）

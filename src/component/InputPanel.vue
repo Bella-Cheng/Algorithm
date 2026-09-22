@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BarState } from '@/types/sort'
+import type { LegendItem } from '@/types/sort'
 
 withDefaults(
   defineProps<{
@@ -9,6 +9,8 @@ withDefaults(
     stepLabel?: string
     /** CURRENT STEP 卡片說明 */
     stepText?: string
+    /** 顏色圖例，由各演算法頁面傳入 */
+    legends: LegendItem[]
   }>(),
   {
     arr: () => [],
@@ -20,14 +22,6 @@ withDefaults(
 defineEmits<{
   regenerate: []
 }>()
-
-/** 圖例，顏色與 BarChart 的長條狀態一致 */
-const LEGENDS: { state: BarState; label: string }[] = [
-  { state: 'active', label: '選中' },
-  { state: 'comparing', label: '比較中' },
-  { state: 'sorted', label: '已排序' },
-  { state: 'default', label: '尚未處理' },
-]
 </script>
 
 <template>
@@ -55,7 +49,7 @@ const LEGENDS: { state: BarState; label: string }[] = [
       </div>
 
       <ul class="input-panel__legend">
-        <li v-for="legend in LEGENDS" :key="legend.state" class="input-panel__legend-item">
+        <li v-for="legend in legends" :key="legend.state" class="input-panel__legend-item">
           <span
             class="input-panel__legend-dot"
             :class="`input-panel__legend-dot--${legend.state}`"

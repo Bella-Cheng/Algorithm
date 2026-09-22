@@ -2,9 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
-    path: '/',
+    path: '/BubbleSort',
     name: 'BubbleSort',
     component: () => import('@/page/BubbleSortPage.vue'),
+  },
+  {
+    path: '/QuickSort',
+    name: 'QuickSort',
+    component: () => import('@/page/QuickSortPage.vue'),
   },
 ]
 

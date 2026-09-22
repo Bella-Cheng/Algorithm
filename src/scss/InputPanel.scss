@@ -119,8 +119,13 @@
       background: $accent-pink;
     }
 
-    &--sorted {
+    &--sorted,
+    &--less {
       background: $accent-cyan;
+    }
+
+    &--greater {
+      background: $text-muted;
     }
 
     &--default {
