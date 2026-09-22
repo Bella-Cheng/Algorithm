@@ -12,11 +12,20 @@ import {
   createBubbleSortSteps,
 } from '@/algorithms/bubbleSort'
 import { useStepPlayer } from '@/composables/useStepPlayer'
+import type { LegendItem } from '@/types/sort'
 
 /** 隨機陣列的數量與範圍 */
 const ARRAY_LENGTH = 8
 const MIN_VALUE = 1
 const MAX_VALUE = 100
+
+/** 圖例，顏色與 BarChart 的長條狀態一致 */
+const LEGENDS: LegendItem[] = [
+  { state: 'active', label: '選中' },
+  { state: 'comparing', label: '比較中' },
+  { state: 'sorted', label: '已排序' },
+  { state: 'default', label: '尚未處理' },
+]
 
 const randomArray = (length: number, min: number, max: number) => {
   return Array.from({ length }, () => Math.floor(Math.random() * (max - min + 1)) + min)
@@ -72,6 +81,7 @@ function regenerate() {
           :arr="arr"
           :step-label="stepLabel"
           :step-text="step.summary"
+          :legends="LEGENDS"
           @regenerate="regenerate"
         />
       </template>

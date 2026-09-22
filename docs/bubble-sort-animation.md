@@ -53,7 +53,8 @@ useStepPlayer(lastStep) ──► currentStep（索引）
 ## 型別：`src/types/sort.ts`
 
 ```ts
-type BarState = 'default' | 'active' | 'comparing' | 'sorted'
+// less / greater 是快速排序加的，氣泡排序用不到
+type BarState = 'default' | 'active' | 'comparing' | 'less' | 'greater' | 'sorted'
 
 interface SortStep<Phase extends string = string> {
   arr: number[]            // 這一步的陣列內容
@@ -146,9 +147,10 @@ const { currentStep, isPlaying, speed, togglePlay, next, prev, reset, setSpeed }
 | `arr` | 原始輸入陣列，顯示在 INPUT DATA 框 |
 | `stepLabel` | CURRENT STEP 卡片標籤，如 `COMPARE  /  03` |
 | `stepText` | 卡片說明，支援 `\n` 換行（`white-space: pre-line`） |
+| `legends` | 顏色圖例；不傳就用預設的氣泡排序四項（選中 / 比較中 / 已排序 / 尚未處理） |
 | `@regenerate` | 點「產生新資料」 |
 
-圖例（選中 / 比較中 / 已排序 / 尚未處理）寫在元件內，顏色與長條狀態一致。
+圖例顏色與長條狀態一致；快速排序頁面會傳入自己的五項圖例，詳見 [quick-sort-animation.md](./quick-sort-animation.md)。
 
 ### CodePanel.vue（右欄）
 
