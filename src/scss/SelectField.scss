@@ -1,0 +1,58 @@
+.select-field {
+  position: relative; // 讓透明 select 蓋滿整張卡片，點哪裡都能打開選單
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 12px;
+  border: $border-width solid $border;
+  border-radius: $radius-md;
+  background: $surface-raised;
+  transition: border-color 160ms ease;
+
+  &:hover {
+    border-color: rgba($accent-lime, 0.4);
+  }
+
+  &:focus-within {
+    border-color: $accent-lime;
+  }
+
+  &__label {
+    color: $text-muted;
+    font-size: 13px;
+  }
+
+  &__control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: $accent-lime;
+  }
+
+  &__value {
+    overflow: hidden;
+    font-family: $font-mono;
+    font-size: 15px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__arrow {
+    width: 12px;
+    height: 8px;
+    flex-shrink: 0;
+    fill: currentColor;
+  }
+
+  &__select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    appearance: none;
+  }
+}

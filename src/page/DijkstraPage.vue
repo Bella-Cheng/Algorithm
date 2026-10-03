@@ -5,7 +5,10 @@ import ToolFooter from '@/component/ToolFooter.vue'
 import GraphChart from '@/component/GraphChart.vue'
 import InputPanel from '@/component/InputPanel.vue'
 import CodePanel from '@/component/CodePanel.vue'
-import { computed, ref } from 'vue'
+import DataModal from '@/component/DataModal.vue'
+import SelectField from '@/component/SelectField.vue'
+import { computed, ref, watch } from 'vue'
+import type { SelectOption } from '@/types/select'
 import {
   DEFAULT_END,
   DEFAULT_START,
@@ -63,6 +66,42 @@ const stepLabel = computed(
     `${DIJKSTRA_PHASE_LABEL[step.value.phase]}  ${step.value.focus}  /  ${String(step.value.visitedCount).padStart(2, '0')}`,
 )
 
+/** 節點數量選項：4–10 個 */
+const NODE_COUNT_OPTIONS: SelectOption<number>[] = Array.from({ length: 7 }, (_, index) => ({
+  label: String(index + 4),
+  value: index + 4,
+}))
+
+const isModalOpen = ref(false)
+/** 彈窗裡正在編輯的設定 TODO: 之後接上 regenerate，依節點數產生新的圖 */
+const draft = ref({ count: graph.value.nodes.length, start: DEFAULT_START, end: DEFAULT_END })
+
+/** 節點依序命名為 A、B、C…，選項跟著節點數量變動 */
+const nodeOptions = computed<SelectOption<string>[]>(() =>
+  Array.from({ length: draft.value.count }, (_, index) => {
+    const id = String.fromCharCode(65 + index)
+    return { label: id, value: id }
+  }),
+)
+/** 終點不能和起點相同 */
+const endOptions = computed(() => nodeOptions.value.filter((option) => option.value !== draft.value.start))
+
+// 節點數變少或起點改成終點時，把超出範圍的起點/終點修正回來
+watch(
+  [nodeOptions, () => draft.value.start],
+  () => {
+    const ids = nodeOptions.value.map((option) => option.value)
+    if (!ids.includes(draft.value.start)) draft.value.start = ids[0]!
+    if (!endOptions.value.some((option) => option.value === draft.value.end)) {
+      draft.value.end = endOptions.value.at(-1)!.value
+    }
+  },
+)
+
+function openModal() {
+  isModalOpen.value = true
+}
+
 /** 重新產生邊的權重，並把步驟歸 0 */
 function regenerate() {
   reset()
@@ -92,7 +131,7 @@ function regenerate() {
           :step-label="stepLabel"
           :step-text="step.summary"
           :legends="LEGENDS"
-          @regenerate="regenerate"
+          @regenerate="openModal"
         />
       </template>
 
@@ -135,6 +174,18 @@ function regenerate() {
         />
       </template>
     </ToolLayout>
+
+    <DataModal
+      v-model:open="isModalOpen"
+      description="設定節點數量與起訖點後套用至 Dijkstra 最短路徑。"
+      settings-title="GRAPH SETTINGS"
+      hint="建議 4–10 個節點；邊的權重會隨機產生 1–9。"
+      @confirm="regenerate"
+    >
+      <SelectField v-model="draft.count" label="節點數量" :options="NODE_COUNT_OPTIONS" />
+      <SelectField v-model="draft.start" label="起始 node" :options="nodeOptions" />
+      <SelectField v-model="draft.end" label="結束 node" :options="endOptions" />
+    </DataModal>
   </div>
 </template>
 

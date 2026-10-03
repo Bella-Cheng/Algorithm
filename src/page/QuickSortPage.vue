@@ -5,7 +5,16 @@ import ToolFooter from '@/component/ToolFooter.vue'
 import BarChart from '@/component/BarChart.vue'
 import InputPanel from '@/component/InputPanel.vue'
 import CodePanel from '@/component/CodePanel.vue'
+import DataModal from '@/component/DataModal.vue'
+import SelectField from '@/component/SelectField.vue'
+import SortDataFields from '@/component/SortDataFields.vue'
 import { computed, ref } from 'vue'
+import {
+  DEFAULT_SORT_SETTINGS,
+  SORT_DATA_HINT,
+  type SortDataSettings,
+} from '@/algorithms/sortData'
+import type { SelectOption } from '@/types/select'
 import {
   QUICK_SORT_CODE,
   QUICK_SORT_PHASE_LABEL,
@@ -56,7 +65,26 @@ const stepLabel = computed(
   () => `${QUICK_SORT_PHASE_LABEL[step.value.phase]}  /  ${String(step.value.pass).padStart(2, '0')}`,
 )
 
-/** 重新產生陣列，並把步驟歸 0 TODO: 之後再來接彈窗，可以讓使用者自訂 */
+type PivotStrategy = 'right' | 'left' | 'middle' | 'random'
+
+/** 選擇基準值的選項 */
+const PIVOT_OPTIONS: SelectOption<PivotStrategy>[] = [
+  { label: '最右邊', value: 'right' },
+  { label: '最左邊', value: 'left' },
+  { label: '中間', value: 'middle' },
+  { label: '隨機', value: 'random' },
+]
+
+const isModalOpen = ref(false)
+/** 彈窗裡正在編輯的設定 TODO: 之後接上 regenerate 與 createQuickSortSteps */
+const draft = ref<SortDataSettings>({ ...DEFAULT_SORT_SETTINGS })
+const pivotDraft = ref<PivotStrategy>('right')
+
+function openModal() {
+  isModalOpen.value = true
+}
+
+/** 重新產生陣列，並把步驟歸 0 */
 function regenerate() {
   reset()
   arr.value = randomArray(ARRAY_LENGTH, MIN_VALUE, MAX_VALUE)
@@ -83,7 +111,7 @@ function regenerate() {
           :step-label="stepLabel"
           :step-text="step.summary"
           :legends="LEGENDS"
-          @regenerate="regenerate"
+          @regenerate="openModal"
         />
       </template>
 
@@ -123,6 +151,20 @@ function regenerate() {
         />
       </template>
     </ToolLayout>
+
+    <DataModal
+      v-model:open="isModalOpen"
+      description="設定資料範圍與基準值後套用至快速排序。"
+      extra-title="PIVOT"
+      :hint="SORT_DATA_HINT"
+      @confirm="regenerate"
+    >
+      <SortDataFields v-model="draft" />
+
+      <template #extra>
+        <SelectField v-model="pivotDraft" label="選擇基準值" :options="PIVOT_OPTIONS" />
+      </template>
+    </DataModal>
   </div>
 </template>
 
