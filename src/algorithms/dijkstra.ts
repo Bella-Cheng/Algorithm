@@ -1,5 +1,5 @@
 import { edgeKey } from '@/types/graph'
-import type { EdgeState, Graph, GraphEdge, GraphStep, NodeState } from '@/types/graph'
+import type { EdgeState, GraphEdge, GraphNode, GraphStep, NodeState } from '@/types/graph'
 
 /**
  * 無向圖的鄰接表：節點 → { 鄰居節點: 距離 }
@@ -131,17 +131,22 @@ export function dijkstra(
   return { table, route, distance }
 }
 
-/** 把畫面用的 Graph（無向邊）轉成鄰接表，兩個方向都要加 */
-export function toAdjacency(graph: Graph): DijkstraGraph {
-  console.log("graph", graph)
-  
-  const data: DijkstraGraph = {}
-  for (const { id } of graph.nodes) data[id] = {}
-  for (const { from, to, weight } of graph.edges) {
-    data[from] = { ...data[from], [to]: weight }
-    data[to] = { ...data[to], [from]: weight }
+/**
+ * 從鄰接表整理出不重複的邊清單，給畫面畫線用
+ * 無向圖中 A: { B: 4 } 與 B: { A: 4 } 是同一條邊，只保留先出現的那筆
+ */
+export function toEdges(data: DijkstraGraph): GraphEdge[] {
+  const edges: GraphEdge[] = []
+  const seen = new Set<string>()
+  for (const [from, neighbors] of Object.entries(data)) {
+    for (const [to, weight] of Object.entries(neighbors)) {
+      const key = edgeKey(from, to)
+      if (seen.has(key)) continue
+      seen.add(key)
+      edges.push({ from, to, weight })
+    }
   }
-  return data
+  return edges
 }
 
 // ---------------------------------------------------------------------------
@@ -195,8 +200,22 @@ export const DIJKSTRA_CODE = [
   '}',
 ]
 
-/** 固定的節點位置（SVG viewBox 820 × 520），版面對照設計稿 */
-const NODES = [
+/** 設計稿上的圖，演算法與畫面共用的唯一資料來源 */
+export const DIJKSTRA_DATA: DijkstraGraph = {
+  A: { B: 4, C: 2, D: 7 },
+  B: { A: 4, C: 3, E: 1, F: 5 },
+  C: { A: 2, B: 3, D: 6, F: 8 },
+  D: { A: 7, C: 6, G: 4 },
+  E: { B: 1, F: 2, G: 7 },
+  F: { B: 5, C: 8, E: 2, G: 3 },
+  G: { D: 4, E: 7, F: 3 },
+}
+
+/**
+ * 每個節點在畫面上的位置（SVG viewBox 820 × 520），版面對照設計稿
+ * 鄰接表裡沒有座標，所以另外存；data 新增節點時這裡也要加
+ */
+export const NODE_POSITIONS: GraphNode[] = [
   { id: 'A', x: 60, y: 236 },
   { id: 'B', x: 280, y: 50 },
   { id: 'C', x: 280, y: 236 },
@@ -206,22 +225,6 @@ const NODES = [
   { id: 'G', x: 760, y: 380 },
 ]
 
-/** 設計稿上的邊與權重，作為頁面載入時的預設圖 */
-const DEFAULT_EDGES: GraphEdge[] = [
-  { from: 'A', to: 'B', weight: 4 },
-  { from: 'A', to: 'C', weight: 2 },
-  { from: 'A', to: 'D', weight: 7 },
-  { from: 'B', to: 'C', weight: 3 },
-  { from: 'B', to: 'E', weight: 1 },
-  { from: 'B', to: 'F', weight: 5 },
-  { from: 'C', to: 'D', weight: 6 },
-  { from: 'C', to: 'F', weight: 8 },
-  { from: 'D', to: 'G', weight: 4 },
-  { from: 'E', to: 'F', weight: 2 },
-  { from: 'E', to: 'G', weight: 7 },
-  { from: 'F', to: 'G', weight: 3 },
-]
-
 /** 隨機權重範圍 */
 const MIN_WEIGHT = 1
 const MAX_WEIGHT = 9
@@ -229,17 +232,20 @@ const MAX_WEIGHT = 9
 export const DEFAULT_START = 'A'
 export const DEFAULT_END = 'G'
 
-export function createDefaultGraph(): Graph {
-  return { nodes: NODES.map((node) => ({ ...node })), edges: DEFAULT_EDGES.map((edge) => ({ ...edge })) }
-}
-
-/** 保留同樣的節點與連線，只重新產生每條邊的權重 */
-export function createRandomGraph(): Graph {
+/**
+ * 保留同樣的節點與連線，只重新產生每條邊的權重
+ * 以邊為單位產生，A → B 與 B → A 一定拿到同一個權重
+ */
+export function createRandomData(): DijkstraGraph {
   const randomWeight = () => Math.floor(Math.random() * (MAX_WEIGHT - MIN_WEIGHT + 1)) + MIN_WEIGHT
-  return {
-    nodes: NODES.map((node) => ({ ...node })),
-    edges: DEFAULT_EDGES.map((edge) => ({ ...edge, weight: randomWeight() })),
+  const data: DijkstraGraph = {}
+  for (const node in DIJKSTRA_DATA) data[node] = {}
+  for (const { from, to } of toEdges(DIJKSTRA_DATA)) {
+    const weight = randomWeight()
+    data[from]![to] = weight
+    data[to]![from] = weight
   }
+  return data
 }
 
 const formatDistance = (distance: number) => (distance === Infinity ? '∞' : String(distance))
@@ -251,8 +257,10 @@ const formatDistance = (distance: number) => (distance === Infinity ? '∞' : St
  * - frontier（amber）：還在 queue 裡的節點
  * - comparing（pink）：正在檢查、但距離沒有更新（或已處理過而跳過）的鄰居與邊
  */
-export function createDijkstraSteps(graph: Graph, start: string, end: string): DijkstraStep[] {
+export function createDijkstraSteps(data: DijkstraGraph, start: string, end: string): DijkstraStep[] {
   const steps: DijkstraStep[] = []
+  /** 每張快照都要決定每條邊的顏色，先整理好不重複的邊清單 */
+  const edges = toEdges(data)
 
   /**
    * 依目前狀態產生快照
@@ -277,7 +285,7 @@ export function createDijkstraSteps(graph: Graph, start: string, end: string): D
 
     const dist: Record<string, number | null> = {}
     const nodeStates: Record<string, NodeState> = {}
-    for (const { id } of graph.nodes) {
+    for (const id in data) {
       const distance = table.get(id)?.distance ?? Infinity
       dist[id] = distance === Infinity ? null : distance
       if (checking && !checking.updated && id === checking.next) nodeStates[id] = 'comparing'
@@ -288,7 +296,7 @@ export function createDijkstraSteps(graph: Graph, start: string, end: string): D
 
     const checkingKey = checking && edgeKey(checking.node, checking.next)
     const edgeStates: Record<string, EdgeState> = {}
-    for (const { from, to } of graph.edges) {
+    for (const { from, to } of edges) {
       const key = edgeKey(from, to)
       if (pathEdges.has(key)) edgeStates[key] = 'path'
       else if (key === checkingKey) edgeStates[key] = 'comparing'
@@ -300,11 +308,7 @@ export function createDijkstraSteps(graph: Graph, start: string, end: string): D
 
   let lastState: DijkstraState | undefined
 
-  const { route, distance } = dijkstra(toAdjacency(graph), start, end, (event, state) => {
-
-    console.log("graph", graph)
-    console.log("toAdjacency", toAdjacency(graph))
-
+  const { route, distance } = dijkstra(data, start, end, (event, state) => {
     lastState = state
     const distanceOf = (node: string) => state.table.get(node)?.distance ?? Infinity
 

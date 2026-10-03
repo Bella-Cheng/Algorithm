@@ -10,12 +10,15 @@ import {
   DEFAULT_END,
   DEFAULT_START,
   DIJKSTRA_CODE,
+  DIJKSTRA_DATA,
   DIJKSTRA_PHASE_LABEL,
-  createDefaultGraph,
+  NODE_POSITIONS,
   createDijkstraSteps,
-  createRandomGraph,
+  createRandomData,
+  toEdges,
 } from '@/algorithms/dijkstra'
 import { useStepPlayer } from '@/composables/useStepPlayer'
+import type { Graph } from '@/types/graph'
 import type { LegendItem } from '@/types/sort'
 
 /** 圖例，顏色與 GraphChart 的節點狀態一致 */
@@ -25,8 +28,11 @@ const LEGENDS: LegendItem[] = [
   { state: 'frontier', label: '邊界節點' },
 ]
 
-/** 頁面載入時先用設計稿上的圖 */
-const graph = ref(createDefaultGraph())
+/** 鄰接表，頁面載入時先用設計稿上的圖 */
+const data = ref(DIJKSTRA_DATA)
+
+/** 畫面用的圖：節點座標 + 從鄰接表整理出的不重複邊 */
+const graph = computed<Graph>(() => ({ nodes: NODE_POSITIONS, edges: toEdges(data.value) }))
 
 const graphInfo = computed(
   () =>
@@ -36,7 +42,7 @@ const graphInfo = computed(
 /** 依圖預先算出所有步驟，並記錄耗時 */
 const result = computed(() => {
   const start = performance.now()
-  const steps = createDijkstraSteps(graph.value, DEFAULT_START, DEFAULT_END)
+  const steps = createDijkstraSteps(data.value, DEFAULT_START, DEFAULT_END)
   return { steps, duration: performance.now() - start }
 })
 
@@ -58,7 +64,7 @@ const stepLabel = computed(
 /** 重新產生邊的權重，並把步驟歸 0 */
 function regenerate() {
   reset()
-  graph.value = createRandomGraph()
+  data.value = createRandomData()
 }
 </script>
 

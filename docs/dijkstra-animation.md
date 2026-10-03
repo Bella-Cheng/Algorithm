@@ -24,7 +24,37 @@ src/scss/InputPanel.scss           // 新增 path / visited / frontier 圖例顏
 
 ## 預設圖
 
-節點位置固定寫在 `dijkstra.ts` 的 `NODES`，座標系是 GraphChart 的 SVG `viewBox="0 0 820 520"`：
+**唯一的資料來源是鄰接表 `DIJKSTRA_DATA`**，演算法直接用它，畫面要的邊清單也從它整理出來：
+
+```ts
+export const DIJKSTRA_DATA: DijkstraGraph = {
+  A: { B: 4, C: 2, D: 7 },
+  B: { A: 4, C: 3, E: 1, F: 5 },
+  C: { A: 2, B: 3, D: 6, F: 8 },
+  D: { A: 7, C: 6, G: 4 },
+  E: { B: 1, F: 2, G: 7 },
+  F: { B: 5, C: 8, E: 2, G: 3 },
+  G: { D: 4, E: 7, F: 3 },
+}
+```
+
+資料怎麼流到各處：
+
+```
+DIJKSTRA_DATA（鄰接表，每條邊寫兩次）
+  ├─ dijkstra(data, ...)                      → 演算法直接用
+  ├─ toEdges(data)  → 12 條不重複的邊
+  │    ├─ GraphChart 畫線、權重數字
+  │    ├─ snapshot 決定每條邊的顏色
+  │    └─ 左側「12 edges」
+  └─ for (const id in data)                   → snapshot 決定每個節點的顏色
+```
+
+`toEdges(data)` 會把 `A: { B: 4 }` 和 `B: { A: 4 }` 視為同一條邊（用 `edgeKey` 判斷），只保留先出現的那筆，所以 12 條邊在鄰接表裡出現 24 次，畫面只會畫 12 條線。
+
+⚠️ 改 `DIJKSTRA_DATA` 時，**兩個方向的權重要一樣**。`toEdges` 只取先出現的那筆，兩邊不一致時畫面顯示的權重可能跟演算法實際走的方向對不起來。
+
+鄰接表裡沒有座標，所以節點位置另外存在 `NODE_POSITIONS`（座標系是 GraphChart 的 SVG `viewBox="0 0 820 520"`）。**`DIJKSTRA_DATA` 新增節點時，這裡也要加**，否則那個節點和連到它的線不會畫出來：
 
 | 節點 | x | y |
 | --- | --- | --- |
@@ -38,10 +68,9 @@ src/scss/InputPanel.scss           // 新增 path / visited / frontier 圖例顏
 
 邊（無向，共 12 條）：`A-B 4`、`A-C 2`、`A-D 7`、`B-C 3`、`B-E 1`、`B-F 5`、`C-D 6`、`C-F 8`、`D-G 4`、`E-F 2`、`E-G 7`、`F-G 3`。
 
-- `createDefaultGraph()`：回傳上面這張圖（頁面載入時使用）
-- `createRandomGraph()`：**節點與連線不變，只把每條邊的權重重新隨機成 1–9**。這樣「產生新資料」後圖一定連通、版面也不會亂掉
+- `createRandomData()`：**節點與連線不變，只把每條邊的權重重新隨機成 1–9**，回傳新的鄰接表。以邊為單位產生（先 `toEdges`），所以 A → B 與 B → A 一定拿到同一個權重；「產生新資料」後圖一定連通、版面也不會亂掉
 - 起點 `DEFAULT_START = 'A'`、終點 `DEFAULT_END = 'G'`
-- 兩個函式都會複製一份新的物件，避免改到常數
+- 頁面只會把 `data` 整個換成新物件，不會去改 `DIJKSTRA_DATA` 本身
 
 ⚠️ 節點座標要留空間給距離標籤（畫在節點下方 `r + 24`），最下面的節點 y 不要超過約 450，最上面的節點 y 不要小於約 40（半徑 34）。
 
@@ -63,7 +92,7 @@ const data: DijkstraGraph = {
 ```
 
 - **本專案只處理無向圖**：每條邊兩個方向都要寫（`A: { B: 4 }` 和 `B: { A: 4 }`），所以每個節點一定是 `data` 的 key，distance table 直接用 `for (const node in data)` 建立
-- 頁面上的 `Graph`（給 GraphChart 畫圖用的節點座標 + 無向邊）用 `toAdjacency(graph)` 轉成這個格式，會自動補上兩個方向
+- 演算法直接吃這個格式；畫面需要的「每條邊一筆」清單由 `toEdges(data)` 產生（見上方「預設圖」）
 - 如果之後要支援單向圖，有些節點會只出現在鄰居裡、沒有自己的 key，建立 table 時要把鄰居也收進來，不然那些節點會找不到
 
 ### 回傳值
@@ -147,9 +176,9 @@ function dijkstra(data, startNode, endNode) {                            // 1
 - **只處理無向圖**（見上方資料格式）
 - **權重必須 ≥ 0**。有負權重要改用 Bellman-Ford
 
-## 步驟產生器：`createDijkstraSteps(graph, start, end)`
+## 步驟產生器：`createDijkstraSteps(data, start, end)`
 
-呼叫 `dijkstra(toAdjacency(graph), start, end, onStep)`，每收到一個事件就用當下的 `table` / `visited` / `queue` 產生一個快照，最後再補一個 `done` 步驟。
+先用 `toEdges(data)` 整理出邊清單（每張快照都要用它決定邊的顏色），再呼叫 `dijkstra(data, start, end, onStep)`，每收到一個事件就用當下的 `table` / `visited` / `queue` 產生一個快照，最後再補一個 `done` 步驟。步驟本身不需要節點座標，座標只有畫面（GraphChart）用得到。
 
 | 事件 | Phase | 標籤 | 時機 | 高亮行 |
 | --- | --- | --- | --- | --- |
@@ -166,7 +195,7 @@ function dijkstra(data, startNode, endNode) {                            // 1
 - `onStep` 收到的 `state` 是**同一份參考**，快照時要把需要的值複製出來（`snapshot()` 會建立新的 `dist` / `nodeStates` / `edgeStates` 物件）
 - `focus` 是這一步的主角節點，顯示在左側卡片標籤與程式碼面板狀態列，例如 `VISIT  D  /  05`、`UPDATE D`；`done` 步驟的 focus 是終點
 - 卡片標籤最後的數字是**已處理完成的節點數**（`visitedCount = visited.size`），和視覺化標題列的 `VISITED 05 / 07` 一致
-- 鄰居的檢查順序就是 `toAdjacency` 產生的順序，也就是 `DEFAULT_EDGES` 的排列順序
+- 鄰居的檢查順序就是 `DIJKSTRA_DATA` 裡寫的順序，例如 A 會依序檢查 B、C、D
 
 同檔案另外匯出 `DIJKSTRA_CODE`（右側程式碼的每一行）與 `DIJKSTRA_PHASE_LABEL`（phase → 畫面標籤）。**改程式碼常數內容時要一起檢查高亮行號。**
 
@@ -277,17 +306,21 @@ interface LegendItem {
 和排序頁同一個骨架，差別：
 
 ```ts
-const graph = ref(createDefaultGraph())
+/** 鄰接表是頁面唯一的狀態 */
+const data = ref(DIJKSTRA_DATA)
+
+/** 畫面用的圖：節點座標 + 從鄰接表整理出的不重複邊，data 一換就跟著重算 */
+const graph = computed<Graph>(() => ({ nodes: NODE_POSITIONS, edges: toEdges(data.value) }))
 
 const result = computed(() => {
   const start = performance.now()
-  const steps = createDijkstraSteps(graph.value, DEFAULT_START, DEFAULT_END)
+  const steps = createDijkstraSteps(data.value, DEFAULT_START, DEFAULT_END)
   return { steps, duration: performance.now() - start }
 })
 
 function regenerate() {
   reset()
-  graph.value = createRandomGraph()
+  data.value = createRandomData()
 }
 ```
 
@@ -335,13 +368,15 @@ root class 為 `.dijkstra-page`（樣式內容與排序頁相同）。路由是 
 - 腳本測試：通過。用 Node 直接跑：
   - 預設圖逐步輸出，比對距離、節點與邊的狀態符合預期
   - 上方「已驗證的邊界情況」表格中的每一組
-  - 用 `createRandomGraph()` 隨機產生 300 張圖，**每一組起點 × 終點**（49 組，共 14,700 組）都檢查：`distance` 等於 Bellman-Ford 暴力解、`route` 頭尾正確且邊權重加總等於 `distance`、步驟最後一步是 `done`
+  - `toEdges(DIJKSTRA_DATA)` 剛好整理出 12 條邊，權重與設計稿一致
+  - `createRandomData()` 跑 200 次，每次都是 12 條邊，且每條邊兩個方向的權重相同
+  - 用 `createRandomData()` 隨機產生 300 張圖，**每一組起點 × 終點**（49 組，共 14,700 組）都檢查：`distance` 等於 Bellman-Ford 暴力解、`route` 頭尾正確且邊權重加總等於 `distance`、步驟最後一步是 `done`
 - 瀏覽器實際播放：尚未確認
 
 ## 後續待辦（Not in scope）
 
 - 讓使用者選擇起點 / 終點（目前固定 A → G），或點擊節點切換終點
 - 「產生新資料」只換權重，之後可以做隨機連線（需確保連通、邊不要交錯太多）
-- 單向圖：table 要改成連鄰居一起收集，`toAdjacency` 只加一個方向，GraphChart 的邊要加箭頭
+- 單向圖：table 要改成連鄰居一起收集，`toEdges` 不能再把 A→B、B→A 合併，GraphChart 的邊要加箭頭
 - 顯示 queue 目前的內容與 distance table
 - 手機版版面（與排序頁共用的待辦）
