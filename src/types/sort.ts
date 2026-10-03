@@ -1,3 +1,5 @@
+import type { NodeState } from '@/types/graph'
+
 /**
  * 長條圖的顯示狀態
  * - active（lime）：正在處理的元素，快速排序中代表 pivot
@@ -8,9 +10,9 @@
  */
 export type BarState = 'default' | 'active' | 'comparing' | 'less' | 'greater' | 'sorted'
 
-/** 左側面板的顏色圖例 */
+/** 左側面板的顏色圖例（排序頁用 BarState，圖論頁用 NodeState） */
 export interface LegendItem {
-  state: BarState
+  state: BarState | NodeState
   label: string
 }
 

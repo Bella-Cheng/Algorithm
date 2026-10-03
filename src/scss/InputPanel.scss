@@ -39,6 +39,7 @@
     font-family: $font-mono;
     font-size: 13px;
     line-height: 1.6;
+    white-space: pre-line;
   }
 
   &__generate {
@@ -130,6 +131,20 @@
 
     &--default {
       background: $border;
+    }
+
+    // Dijkstra 節點狀態
+    &--path {
+      background: $accent-lime;
+    }
+
+    &--visited {
+      background: $accent-cyan;
+    }
+
+    &--frontier {
+      border: 2px solid $accent-amber;
+      background: transparent;
     }
   }
 }

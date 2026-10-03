@@ -1,0 +1,168 @@
+.graph-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  padding: 28px 32px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__visited {
+    padding: 8px 18px;
+    border-radius: $radius-pill;
+    background: $surface-raised;
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__content {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__svg {
+    width: 100%;
+    max-height: 100%;
+  }
+
+  // 邊
+  &__edge {
+    line {
+      stroke: $text-muted;
+      stroke-width: 2;
+      stroke-linecap: round;
+      transition:
+        stroke 0.25s ease,
+        stroke-width 0.25s ease;
+    }
+
+    &--path line {
+      stroke: $accent-lime;
+      stroke-width: 5;
+    }
+
+    &--comparing {
+      line {
+        stroke: $accent-pink;
+        stroke-width: 3;
+      }
+
+      .graph-chart__weight {
+        fill: $accent-pink;
+      }
+    }
+  }
+
+  &__weight {
+    fill: $text-muted;
+    font-family: $font-mono;
+    font-size: 13px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transition: fill 0.25s ease;
+  }
+
+  // 節點
+  &__node {
+    circle {
+      fill: $surface;
+      stroke: $border;
+      stroke-width: 3;
+      transition:
+        fill 0.25s ease,
+        stroke 0.25s ease;
+    }
+
+    // 已確認且在最短路徑上
+    &--path circle {
+      fill: $accent-lime;
+      stroke: $accent-lime;
+    }
+
+    // 已確認
+    &--visited circle {
+      fill: $accent-cyan;
+      stroke: $accent-cyan;
+    }
+
+    // 已有暫定距離
+    &--frontier circle {
+      stroke: $accent-amber;
+    }
+
+    // 正在檢查但沒有更新
+    &--comparing circle {
+      stroke: $accent-pink;
+    }
+
+    &--path,
+    &--visited {
+      .graph-chart__node-label {
+        fill: $canvas;
+      }
+    }
+  }
+
+  &__node-label {
+    fill: $text-primary;
+    font-family: $font-mono;
+    font-size: 20px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    transition: fill 0.25s ease;
+  }
+
+  &__dist {
+    fill: $text-muted;
+    font-family: $font-mono;
+    font-size: 13px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  &__footer {
+    display: flex;
+    min-height: 96px;
+    gap: 40px;
+    padding: 20px 28px;
+    border: $border-width solid $border;
+    border-radius: $radius-md;
+    background-color: $canvas;
+
+    &__step {
+      flex-shrink: 0;
+      color: $accent-lime;
+      font-family: $font-mono;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+
+    &__info {
+      color: $text-primary;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+  }
+}

@@ -3,6 +3,12 @@ import type { LegendItem } from '@/types/sort'
 
 withDefaults(
   defineProps<{
+    /** 區塊標題，如 INPUT DATA / GRAPH DATA */
+    title?: string
+    /** 資料卡片上方的小標籤 */
+    dataLabel?: string
+    /** 資料卡片內容，沒傳時顯示 arr */
+    dataText?: string
     /** 原始輸入陣列 */
     arr?: number[]
     /** CURRENT STEP 卡片標籤，如 COMPARE / 03 */
@@ -13,6 +19,9 @@ withDefaults(
     legends: LegendItem[]
   }>(),
   {
+    title: 'INPUT DATA',
+    dataLabel: '陣列',
+    dataText: '',
     arr: () => [],
     stepLabel: '',
     stepText: '',
@@ -27,11 +36,11 @@ defineEmits<{
 <template>
   <div class="input-panel">
     <section class="input-panel__section">
-      <h2 class="input-panel__title">INPUT DATA</h2>
+      <h2 class="input-panel__title">{{ title }}</h2>
 
       <div class="input-panel__data">
-        <span class="input-panel__data-label">陣列</span>
-        <p class="input-panel__data-values">{{ arr.join(', ') }}</p>
+        <span class="input-panel__data-label">{{ dataLabel }}</span>
+        <p class="input-panel__data-values">{{ dataText || arr.join(', ') }}</p>
       </div>
 
       <button type="button" class="input-panel__generate" @click="$emit('regenerate')">

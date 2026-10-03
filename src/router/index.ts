@@ -11,6 +11,11 @@ const routes = [
     name: 'QuickSort',
     component: () => import('@/page/QuickSortPage.vue'),
   },
+  {
+    path: '/Dijkstra',
+    name: 'Dijkstra',
+    component: () => import('@/page/DijkstraPage.vue'),
+  },
 ]
 
 const router = createRouter({
