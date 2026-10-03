@@ -55,19 +55,21 @@
         stroke-width 0.25s ease;
     }
 
+    // 最後回推出來的最短路徑
     &--path line {
       stroke: $accent-lime;
       stroke-width: 5;
     }
 
-    &--comparing {
+    // 目前節點正在檢查的那條邊
+    &--checking {
       line {
-        stroke: $accent-pink;
+        stroke: $accent-amber;
         stroke-width: 3;
       }
 
       .graph-chart__weight {
-        fill: $accent-pink;
+        fill: $accent-amber;
       }
     }
   }
@@ -92,32 +94,48 @@
         stroke 0.25s ease;
     }
 
-    // 已確認且在最短路徑上
-    &--path circle {
-      fill: $accent-lime;
-      stroke: $accent-lime;
+    // 目前正在處理
+    &--current circle {
+      fill: $accent-pink;
+      stroke: $accent-pink;
     }
 
-    // 已確認
+    // 在 queue 裡等待處理
+    &--queued circle {
+      fill: $text-muted;
+      stroke: $text-muted;
+    }
+
+    // 已確認最短距離
     &--visited circle {
       fill: $accent-cyan;
       stroke: $accent-cyan;
     }
 
-    // 已有暫定距離
-    &--frontier circle {
-      stroke: $accent-amber;
+    // 最後回推出來的最短路徑
+    &--path circle {
+      fill: $accent-lime;
+      stroke: $accent-lime;
     }
 
-    // 正在檢查但沒有更新
-    &--comparing circle {
-      stroke: $accent-pink;
-    }
-
-    &--path,
-    &--visited {
+    &--current,
+    &--queued,
+    &--visited,
+    &--path {
       .graph-chart__node-label {
         fill: $canvas;
+      }
+    }
+
+    // 正在被檢查的鄰居：疊在任何填色上的 amber 外框，寫在最後才能蓋過上面的 stroke
+    &--checking {
+      circle {
+        stroke: $accent-amber;
+        stroke-width: 5;
+      }
+
+      .graph-chart__dist {
+        fill: $accent-amber;
       }
     }
   }

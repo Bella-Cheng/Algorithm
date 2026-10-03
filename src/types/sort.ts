@@ -1,4 +1,4 @@
-import type { NodeState } from '@/types/graph'
+import type { GraphLegendState } from '@/types/graph'
 
 /**
  * 長條圖的顯示狀態
@@ -10,9 +10,9 @@ import type { NodeState } from '@/types/graph'
  */
 export type BarState = 'default' | 'active' | 'comparing' | 'less' | 'greater' | 'sorted'
 
-/** 左側面板的顏色圖例（排序頁用 BarState，圖論頁用 NodeState） */
+/** 左側面板的顏色圖例（排序頁用 BarState，圖論頁用 GraphLegendState） */
 export interface LegendItem {
-  state: BarState | NodeState
+  state: BarState | GraphLegendState
   label: string
 }
 

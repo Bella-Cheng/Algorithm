@@ -9,6 +9,8 @@ const props = withDefaults(
     /** 每個節點目前的距離，null 顯示 ∞ */
     dist?: Record<string, number | null>
     nodeStates?: Record<string, NodeState>
+    /** 正在被檢查的鄰居，疊一圈 amber 外框 */
+    checkingNode?: string | null
     /** key 為 edgeKey(from, to) */
     edgeStates?: Record<string, EdgeState>
     /** 標題列右側的名稱，如 WEIGHTED GRAPH */
@@ -21,6 +23,7 @@ const props = withDefaults(
   {
     dist: () => ({}),
     nodeStates: () => ({}),
+    checkingNode: null,
     edgeStates: () => ({}),
     title: 'GRAPH',
     visitedCount: 0,
@@ -67,12 +70,11 @@ const edges = computed(() => {
   })
 })
 
-/** path 邊畫在最上層，避免被灰色的邊蓋住 */
-const sortedEdges = computed(() =>
-  [...edges.value].sort(
-    (a, b) => Number(props.edgeStates[a.key] === 'path') - Number(props.edgeStates[b.key] === 'path'),
-  ),
-)
+/** 有顏色的邊（path / checking）畫在最上層，避免被灰色的邊蓋住 */
+const sortedEdges = computed(() => {
+  const isHighlighted = (key: string) => Number((props.edgeStates[key] ?? 'default') !== 'default')
+  return [...edges.value].sort((a, b) => isHighlighted(a.key) - isHighlighted(b.key))
+})
 
 function formatDist(id: string) {
   const value = props.dist[id]
@@ -109,7 +111,10 @@ function pad(value: number) {
           v-for="node in graph.nodes"
           :key="node.id"
           class="graph-chart__node"
-          :class="`graph-chart__node--${nodeStates[node.id] ?? 'default'}`"
+          :class="[
+            `graph-chart__node--${nodeStates[node.id] ?? 'default'}`,
+            { 'graph-chart__node--checking': node.id === checkingNode },
+          ]"
         >
           <circle :cx="node.x" :cy="node.y" :r="NODE_RADIUS" />
           <text :x="node.x" :y="node.y" class="graph-chart__node-label">{{ node.id }}</text>

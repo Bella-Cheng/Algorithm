@@ -23,9 +23,11 @@ import type { LegendItem } from '@/types/sort'
 
 /** 圖例，顏色與 GraphChart 的節點狀態一致 */
 const LEGENDS: LegendItem[] = [
+  { state: 'current', label: '目前節點' },
+  { state: 'checking', label: '檢查中的鄰居' },
+  { state: 'queued', label: '等待中（queue）' },
+  { state: 'visited', label: '已確認' },
   { state: 'path', label: '最短路徑' },
-  { state: 'visited', label: '已確認節點' },
-  { state: 'frontier', label: '邊界節點' },
 ]
 
 /** 鄰接表，頁面載入時先用設計稿上的圖 */
@@ -100,6 +102,7 @@ function regenerate() {
           :graph="graph"
           :dist="step.dist"
           :node-states="step.nodeStates"
+          :checking-node="step.checkingNode"
           :edge-states="step.edgeStates"
           :visited-count="step.visitedCount"
           :current-step="currentStep"

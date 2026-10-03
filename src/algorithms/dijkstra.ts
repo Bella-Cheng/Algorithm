@@ -126,8 +126,6 @@ export function dijkstra(
     }
   }
 
-  console.log("table", table)
-
   return { table, route, distance }
 }
 
@@ -252,10 +250,11 @@ const formatDistance = (distance: number) => (distance === Infinity ? '∞' : St
 
 /**
  * 執行 dijkstra()，把每個事件記錄成步驟快照。
- * - path（lime）：起點到焦點節點的最短路徑；最後一步為起點到終點的路徑
- * - visited（cyan）：已處理完成的節點
- * - frontier（amber）：還在 queue 裡的節點
- * - comparing（pink）：正在檢查、但距離沒有更新（或已處理過而跳過）的鄰居與邊
+ * - current（pink 實心）：目前正在處理的節點
+ * - checking（amber 外框 / amber 邊）：目前節點正在檢查的鄰居與那條邊
+ * - queued（muted 實心）：在 queue 裡等待處理
+ * - visited（cyan 實心）：已確認最短距離
+ * - path（lime 實心 / lime 粗線）：搜尋結束後，從終點一個一個回推出來的最短路徑
  */
 export function createDijkstraSteps(data: DijkstraGraph, start: string, end: string): DijkstraStep[] {
   const steps: DijkstraStep[] = []
@@ -264,23 +263,29 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
 
   /**
    * 依目前狀態產生快照
-   * @param pathTo 要畫出最短路徑的節點（從 previous 回推到起點）
-   * @param checking 正在檢查的邊與鄰居；距離沒更新時標成 comparing
+   * @param highlight 這一步要特別標色的東西，都可以不傳
+   * - current：目前正在處理的節點（pink）
+   * - checking：目前節點正在檢查的鄰居（amber 外框與 amber 邊）
+   * - path：回推最短路徑時，已經亮起來的節點（lime）
    */
   const snapshot = (
     { table, visited, queue }: DijkstraState,
-    step: Omit<DijkstraStep, 'dist' | 'nodeStates' | 'edgeStates' | 'visitedCount'>,
-    pathTo: string,
-    checking?: { node: string; next: string; updated: boolean },
+    step: Omit<DijkstraStep, 'dist' | 'nodeStates' | 'checkingNode' | 'edgeStates' | 'visitedCount'>,
+    {
+      current = null,
+      checking,
+      path = [],
+    }: {
+      current?: string | null
+      checking?: { node: string; next: string }
+      path?: string[]
+    },
   ) => {
-    /** 紀錄經過的每個節點 例如目前是 C，會從 C 回推到起點 */
-    const pathNodes = new Set<string>()
-    /** 紀錄經過的每個節點路線 例如: A-C */
+    const pathNodes = new Set(path)
+    /** 路徑上相鄰兩個節點之間的邊，例如 ['E', 'F', 'G'] → E-F、F-G */
     const pathEdges = new Set<string>()
-    for (let current: string | null = pathTo; current !== null; current = table.get(current)?.previous ?? null) {
-      pathNodes.add(current)
-      const before = table.get(current)?.previous
-      if (before) pathEdges.add(edgeKey(before, current))
+    for (let i = 1; i < path.length; i++) {
+      pathEdges.add(edgeKey(path[i - 1]!, path[i]!))
     }
 
     const dist: Record<string, number | null> = {}
@@ -288,9 +293,10 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
     for (const id in data) {
       const distance = table.get(id)?.distance ?? Infinity
       dist[id] = distance === Infinity ? null : distance
-      if (checking && !checking.updated && id === checking.next) nodeStates[id] = 'comparing'
-      else if (visited.has(id)) nodeStates[id] = pathNodes.has(id) ? 'path' : 'visited'
-      else if (queue.has(id)) nodeStates[id] = 'frontier'
+      if (pathNodes.has(id)) nodeStates[id] = 'path'
+      else if (id === current) nodeStates[id] = 'current'
+      else if (visited.has(id)) nodeStates[id] = 'visited'
+      else if (queue.has(id)) nodeStates[id] = 'queued'
       else nodeStates[id] = 'default'
     }
 
@@ -299,11 +305,18 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
     for (const { from, to } of edges) {
       const key = edgeKey(from, to)
       if (pathEdges.has(key)) edgeStates[key] = 'path'
-      else if (key === checkingKey) edgeStates[key] = 'comparing'
+      else if (key === checkingKey) edgeStates[key] = 'checking'
       else edgeStates[key] = 'default'
     }
 
-    steps.push({ ...step, dist, nodeStates, edgeStates, visitedCount: visited.size })
+    steps.push({
+      ...step,
+      dist,
+      nodeStates,
+      checkingNode: checking?.next ?? null,
+      edgeStates,
+      visitedCount: visited.size,
+    })
   }
 
   let lastState: DijkstraState | undefined
@@ -325,7 +338,7 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
               `${start} 的距離設為 0，其他節點都是 ∞。每一輪從 queue 取出距離最小的節點，` +
               `更新它還沒處理過的鄰居，直到取出終點 ${end}。`,
           },
-          start,
+          {},
         )
         break
 
@@ -340,9 +353,9 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
             summary: `取出距離最小的 ${node}\n最短距離確定為 ${distanceOf(node)}。`,
             detail:
               `${node} 的距離 ${distanceOf(node)} 是 queue 中最小的，因為權重都 ≥ 0，` +
-              `不會再有更短的路，${node} 處理完成，接著檢查它的鄰居。`,
+              `不會再有更短的路，${node} 的最短距離確定，接著檢查它的鄰居。`,
           },
-          node,
+          { current: node },
         )
         break
       }
@@ -358,7 +371,7 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
             summary: `取出終點 ${node}\n最短距離為 ${distanceOf(node)}，結束搜尋。`,
             detail: `${node} 已經是 queue 中距離最小的節點，它的距離不會再變短，不用再處理剩下的節點。`,
           },
-          node,
+          { current: node },
         )
         break
       }
@@ -371,11 +384,10 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
             phase: 'skip',
             focus: node,
             highlightLines: [13, 14],
-            summary: `${next} 已處理完成\n跳過。`,
-            detail: `${next} 的最短距離已確定為 ${distanceOf(next)}，不用再從 ${node} 檢查。`,
+            summary: `${next} 已確認\n跳過。`,
+            detail: `${next} 的最短距離已確定為 ${distanceOf(next)}，不會再變短，不用再從 ${node} 檢查。`,
           },
-          node,
-          { node, next, updated: false },
+          { current: node, checking: { node, next } },
         )
         break
       }
@@ -397,8 +409,7 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
                 `比原本的 ${formatDistance(oldDistance)} 更短，${next} 的 previous 改為 ${node}，` +
                 (oldDistance === Infinity ? '並加入 queue。' : 'queue 裡的距離也跟著變短。'),
             },
-            next,
-            { node, next, updated },
+            { current: node, checking: { node, next } },
           )
         } else {
           snapshot(
@@ -410,8 +421,7 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
               summary: `檢查 ${node} → ${next}\n距離不變。`,
               detail: base + `沒有比 ${next} 目前的 ${formatDistance(oldDistance)} 更短，維持不變。`,
             },
-            node,
-            { node, next, updated },
+            { current: node, checking: { node, next } },
           )
         }
         break
@@ -419,23 +429,48 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
     }
   })
 
-  // 收尾：畫出起點到終點的路徑
-  if (lastState) {
-    const reachable = route.length > 0
+  if (!lastState) return steps
+
+  // 無法抵達：只補一步說明
+  if (route.length === 0) {
     snapshot(
       lastState,
       {
         phase: 'done',
         focus: end,
-        highlightLines: reachable ? [23, 24, 25, 26, 27] : [22],
-        summary: reachable
-          ? `最短路徑 ${route.join(' → ')}\n總距離 ${distance}。`
-          : `${end} 無法抵達。`,
-        detail: reachable
-          ? `從 ${end} 沿著 previous 一路回推到 ${start}，得到最短路徑 ${route.join(' → ')}，總距離為 ${distance}。`
-          : `queue 已經清空，${end} 的距離仍是 ∞，代表從 ${start} 沒有路可以到 ${end}。`,
+        highlightLines: [22],
+        summary: `${end} 無法抵達。`,
+        detail: `queue 已經清空，${end} 的距離仍是 ∞，代表從 ${start} 沒有路可以到 ${end}。`,
       },
-      end,
+      {},
+    )
+    return steps
+  }
+
+  // 收尾：照程式碼的順序，從終點沿著 previous 往回走，一次亮一個節點
+  for (let index = route.length - 1; index >= 0; index--) {
+    const node = route[index]!
+    const before = route[index - 1]
+    const isFirst = index === route.length - 1
+    const isLast = index === 0
+    /** 目前已經亮起來的節點：從 node 到終點 */
+    const lit = route.slice(index)
+
+    snapshot(
+      lastState,
+      {
+        phase: 'done',
+        focus: node,
+        highlightLines: isLast ? [24, 25, 26, 27] : isFirst ? [23, 24, 25] : [24, 25],
+        summary: isLast
+          ? `最短路徑 ${route.join(' → ')}\n總距離 ${distance}。`
+          : `回推到 ${node}\n${node} 的 previous 是 ${before}。`,
+        detail: isLast
+          ? `${node} 是起點，previous 為 null，回推結束。最短路徑為 ${route.join(' → ')}，總距離 ${distance}。`
+          : (isFirst ? `從終點 ${end} 開始，沿著 previous 一路往回走。` : '') +
+            `${node} 是從 ${before} 過來的，下一站往 ${before} 走。目前路徑：${lit.join(' → ')}。`,
+      },
+      { path: lit },
     )
   }
 

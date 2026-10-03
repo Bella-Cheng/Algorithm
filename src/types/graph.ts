@@ -1,20 +1,25 @@
 /**
- * 節點的顯示狀態
- * - path（lime 實心）：已確認，且在目前焦點的最短路徑上
- * - visited（cyan 實心）：已確認最短距離的節點
- * - frontier（amber 外框）：已有暫定距離、尚未確認的節點
- * - comparing（pink 外框）：正在檢查、但距離沒有更新的鄰居
+ * 節點的填色（一個節點同時只會有一種）
+ * - current（pink 實心）：目前正在處理的節點
+ * - queued（muted 實心）：在 queue 裡等待處理
+ * - visited（cyan 實心）：已確認最短距離
+ * - path（lime 實心）：最後回推出來的最短路徑
  * - default：尚未抵達（距離為 ∞）
+ *
+ * 「正在被檢查的鄰居」是另外疊上的 amber 外框（GraphStep.checkingNode），可以和任何填色並存
  */
-export type NodeState = 'default' | 'frontier' | 'visited' | 'path' | 'comparing'
+export type NodeState = 'default' | 'current' | 'queued' | 'visited' | 'path'
+
+/** 圖例用：節點填色 + 檢查中的外框 */
+export type GraphLegendState = NodeState | 'checking'
 
 /**
  * 邊的顯示狀態
- * - path（lime 粗線）：目前焦點的最短路徑
- * - comparing（pink）：正在鬆弛（relax）的邊
+ * - checking（amber）：目前節點正在檢查的那條邊
+ * - path（lime 粗線）：最後回推出來的最短路徑
  * - default：一般的邊
  */
-export type EdgeState = 'default' | 'path' | 'comparing'
+export type EdgeState = 'default' | 'checking' | 'path'
 
 export interface GraphNode {
   id: string
@@ -40,6 +45,8 @@ export interface GraphStep<Phase extends string = string> {
   /** 每個節點目前的距離，尚未抵達為 null（畫面顯示 ∞） */
   dist: Record<string, number | null>
   nodeStates: Record<string, NodeState>
+  /** 正在被檢查的鄰居（畫 amber 外框），沒有時為 null */
+  checkingNode: string | null
   /** key 為 edgeKey(from, to) */
   edgeStates: Record<string, EdgeState>
   /** 已確認的節點數 */

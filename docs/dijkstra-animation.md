@@ -15,9 +15,9 @@ src/component/GraphChart.vue       // 新增：SVG 加權圖視覺化（取代 B
 src/scss/GraphChart.scss           // 新增：節點、邊、權重、距離標籤樣式
 src/page/DijkstraPage.vue          // 新增：頁面組合
 src/router/index.ts                // 新增 /Dijkstra 路由
-src/types/sort.ts                  // LegendItem.state 放寬為 BarState | NodeState
+src/types/sort.ts                  // LegendItem.state 放寬為 BarState | GraphLegendState
 src/component/InputPanel.vue       // 新增 title / dataLabel / dataText props
-src/scss/InputPanel.scss           // 新增 path / visited / frontier 圖例顏色；資料文字支援換行
+src/scss/InputPanel.scss           // 新增 current / checking / queued / visited / path 圖例顏色；資料文字支援換行
 ```
 
 `BarChart`、`CodePanel`、`ToolFooter`、`ToolHeader`、`ToolLayout`、`useStepPlayer` 完全沒有改。
@@ -178,22 +178,37 @@ function dijkstra(data, startNode, endNode) {                            // 1
 
 ## 步驟產生器：`createDijkstraSteps(data, start, end)`
 
-先用 `toEdges(data)` 整理出邊清單（每張快照都要用它決定邊的顏色），再呼叫 `dijkstra(data, start, end, onStep)`，每收到一個事件就用當下的 `table` / `visited` / `queue` 產生一個快照，最後再補一個 `done` 步驟。步驟本身不需要節點座標，座標只有畫面（GraphChart）用得到。
+先用 `toEdges(data)` 整理出邊清單（每張快照都要用它決定邊的顏色），再呼叫 `dijkstra(data, start, end, onStep)`，每收到一個事件就用當下的 `table` / `visited` / `queue` 產生一個快照。搜尋結束後，再補上**回推最短路徑**的步驟。步驟本身不需要節點座標，座標只有畫面（GraphChart）用得到。
 
 | 事件 | Phase | 標籤 | 時機 | 高亮行 |
 | --- | --- | --- | --- | --- |
 | `start` | `start` | `READY` | 初始化 table、visited、queue | 2–8 |
 | `visit` | `visit` | `VISIT` | 從 queue 取出距離最小的節點 | 9, 10, 11 |
 | `found` | `found` | `FOUND` | 取出的是終點，結束搜尋 | 10, 11, 12 |
-| `skip` | `skip` | `SKIP` | 鄰居已處理完成，跳過 | 13, 14 |
+| `skip` | `skip` | `SKIP` | 鄰居已確認，跳過 | 13, 14 |
 | `relax`（`updated`） | `update` | `UPDATE` | 找到更短的距離，更新 distance / previous | 15–18 |
 | `relax`（未更新） | `relax` | `RELAX` | 檢查鄰居，距離沒變短 | 15, 16 |
-| — | `done` | `ROUTE` | 從終點回推路徑；無法抵達時高亮第 22 行 | 23–27 / 22 |
+| — | `done` | `ROUTE` | 回推路徑，**每個路徑節點一步**（見下方） | 23–25 / 24–25 / 24–27 |
+| — | `done` | `ROUTE` | 無法抵達，只有一步 | 22 |
+
+### 回推最短路徑的步驟
+
+照程式碼第 24–25 行的順序，**從終點沿著 `previous` 往回走，一次亮一個節點**。以 A → G 為例，路徑是 A → B → E → F → G：
+
+| 步驟 | 亮起來的節點（lime） | 亮起來的邊 | 高亮行 |
+| --- | --- | --- | --- |
+| 第 1 步 | G | — | 23, 24, 25 |
+| 第 2 步 | F、G | F-G | 24, 25 |
+| 第 3 步 | E、F、G | E-F、F-G | 24, 25 |
+| 第 4 步 | B、E、F、G | B-E、E-F、F-G | 24, 25 |
+| 第 5 步 | A、B、E、F、G | 全部 4 條 | 24, 25, 26, 27 |
+
+最後一步的說明會顯示完整路徑與總距離。起點 = 終點時只有一步。
 
 其他規則：
 
 - `onStep` 收到的 `state` 是**同一份參考**，快照時要把需要的值複製出來（`snapshot()` 會建立新的 `dist` / `nodeStates` / `edgeStates` 物件）
-- `focus` 是這一步的主角節點，顯示在左側卡片標籤與程式碼面板狀態列，例如 `VISIT  D  /  05`、`UPDATE D`；`done` 步驟的 focus 是終點
+- `focus` 是這一步的主角節點，顯示在左側卡片標籤與程式碼面板狀態列，例如 `VISIT  D  /  05`、`UPDATE D`；回推步驟的 focus 是目前回推到的節點
 - 卡片標籤最後的數字是**已處理完成的節點數**（`visitedCount = visited.size`），和視覺化標題列的 `VISITED 05 / 07` 一致
 - 鄰居的檢查順序就是 `DIJKSTRA_DATA` 裡寫的順序，例如 A 會依序檢查 B、C、D
 
@@ -204,7 +219,8 @@ function dijkstra(data, startNode, endNode) {                            // 1
 | 欄位 | 意義 |
 | --- | --- |
 | `dist` | 每個節點目前的距離，`Infinity` 轉成 `null`（畫面顯示 `∞`） |
-| `nodeStates` | 每個節點的顯示狀態 |
+| `nodeStates` | 每個節點的填色 |
+| `checkingNode` | 正在被檢查的鄰居（畫 amber 外框），沒有時為 `null` |
 | `edgeStates` | 每條邊的顯示狀態，key 由 `edgeKey(a, b)` 產生 |
 | `visitedCount` | 已處理完成的節點數 |
 | `focus` | 這一步的主角節點 |
@@ -214,32 +230,48 @@ function dijkstra(data, startNode, endNode) {                            // 1
 
 ### 節點 / 邊狀態怎麼算
 
-**先決定要畫哪一條路徑**（`pathTo`），從 `table` 的 `previous` 回推到起點：
+`snapshot(state, step, highlight)` 的第三個參數是一個物件，裡面三個欄位都可以不傳：
 
-- `update` 步驟：被更新的鄰居（路徑會延伸到它身上）
-- `done` 步驟：終點，也就是最後的最短路徑
-- 其他步驟：目前取出的節點
+| 欄位 | 意思 | 誰會傳 | 預設 |
+| --- | --- | --- | --- |
+| `current` | 目前正在處理的節點 | visit / found / skip / relax / update | `null` |
+| `checking` | `{ node, next }`，目前節點正在檢查的鄰居 | skip / relax / update | 不標 |
+| `path` | 回推時已經亮起來的節點 | 只有回推步驟 | `[]` |
 
-**節點**判斷順序（先命中先決定）：
+```ts
+snapshot(state, { ... }, {})                                          // start：沒有要標色的
+snapshot(state, { ... }, { current: node })                           // visit / found
+snapshot(state, { ... }, { current: node, checking: { node, next } }) // skip / relax / update
+snapshot(lastState, { ... }, { path: lit })                           // 回推路徑
+```
+
+用物件傳是為了讓呼叫的地方一看就知道每個值是什麼，不用照位置對、也不用為了跳過中間的參數塞 `undefined`。
+
+`pathEdges` 是把 `path` 裡每兩個相鄰的節點配成一條邊，例如 `['E', 'F', 'G']` → `E-F`、`F-G`。
+
+**節點填色**判斷順序（先命中先決定，每個節點只會有一種）：
 
 ```
-skip / relax 中被檢查的鄰居 → comparing
-已處理完成 且在路徑上        → path
-已處理完成                    → visited
-在 queue 裡                   → frontier
-其他                          → default
+在 path 裡       → path     （lime）
+是 current       → current  （pink）
+在 visited 裡    → visited  （cyan）
+在 queue 裡      → queued   （muted）
+其他             → default
 ```
+
+**檢查中的外框**另外存在 `checkingNode`，不參與上面的判斷，所以可以和任何填色並存。例如 C 在檢查已確認的 A 時，A 是「cyan 填滿 + amber 外框」。
+
+注意 `visited` 在 `dijkstra()` 取出節點的當下就已經加入（`visited.add(node)` 在 `onStep` 之前），所以 current 的判斷要排在 visited 前面，目前節點才會是 pink 而不是 cyan。
 
 **邊**判斷順序：
 
 ```
-在路徑上                      → path
-skip / relax / update 中正在檢查的這條 → comparing
-其他                          → default
+路徑上相鄰兩點之間的邊   → path      （lime 粗線）
+current → checking 的邊  → checking  （amber）
+其他                     → default
 ```
 
-- `update` 時被檢查的邊一定在路徑上，所以會是 lime 而不是 pink，視覺上就是「路徑延伸過去了」
-- 最後的 `done` 步驟只畫出**起點到終點的那一條路徑**，其他處理過的節點維持 cyan
+搜尋過程中完全不會出現 lime。lime 只在最後回推路徑時出現，代表「這就是答案」。
 
 ## GraphChart 元件
 
@@ -249,7 +281,8 @@ skip / relax / update 中正在檢查的這條 → comparing
 | --- | --- | --- |
 | `graph` | `Graph` | 必填，節點座標與無向邊 |
 | `dist` | `Record<string, number \| null>` | 節點下方的距離，`null` 顯示 `∞` |
-| `nodeStates` | `Record<string, NodeState>` | 節點狀態，沒給的節點視為 `default` |
+| `nodeStates` | `Record<string, NodeState>` | 節點填色，沒給的節點視為 `default` |
+| `checkingNode` | `string \| null` | 疊一圈 amber 外框的節點，距離數字也變 amber |
 | `edgeStates` | `Record<string, EdgeState>` | 邊狀態，key 為 `edgeKey(from, to)` |
 | `title` | `string` | 標題列 `VISUALIZATION / {title}` |
 | `visitedCount` | `number` | 右上角 `VISITED 05 / 07`，分母是節點總數 |
@@ -261,19 +294,26 @@ skip / relax / update 中正在檢查的這條 → comparing
 
 ## 顏色規則
 
+**原則：每個顏色只有一個意思。** 填色表示節點「目前在哪個階段」，amber 外框表示「這一步正在看它」。
+
 | 狀態 | 意義 | 節點 | 邊 |
 | --- | --- | --- | --- |
-| `path` | 最短路徑 | `$accent-lime` 實心，字變 `$canvas` | `$accent-lime` 粗線（5px） |
-| `visited` | 已處理完成（不在目前路徑上） | `$accent-cyan` 實心，字變 `$canvas` | — |
-| `frontier` | 邊界節點：在 queue 裡、尚未處理 | `$accent-amber` 外框 | — |
-| `comparing` | 正在檢查、距離沒變 / 已處理而跳過 | `$accent-pink` 外框 | `$accent-pink` 線與權重數字 |
+| `current` | 目前正在處理的節點 | `$accent-pink` 實心 | — |
+| `checking` | 目前節點正在檢查的鄰居 | `$accent-amber` 外框（5px），可疊在任何填色上；距離數字也變 amber | `$accent-amber` 線與權重數字 |
+| `queued` | 在 queue 裡等待處理 | `$text-muted` 實心 | — |
+| `visited` | 已確認最短距離 | `$accent-cyan` 實心 | — |
+| `path` | 最後回推出的最短路徑 | `$accent-lime` 實心 | `$accent-lime` 粗線（5px） |
 | `default` | 尚未抵達 / 一般的邊 | `$surface` 底、`$border` 外框 | `$text-muted` 細線（2px） |
+
+一個節點的變化通常是：`default` → `queued`（被更新距離、加入 queue）→ `current`（被取出）→ `visited`（處理完、換下一個節點）→ 如果在答案路徑上，最後變成 `path`。
 
 說明：
 
-- 左欄圖例只放 `path` / `visited` / `frontier` 三項；`comparing` 是過場色，和快速排序一樣不列入圖例
-- `frontier` 的圖例圓點是 amber 外框、透明底，對應節點的樣子
-- path 邊在 GraphChart 裡會排序到最後才畫（`sortedEdges`），避免被灰色的邊蓋住
+- 實心的節點（current / queued / visited / path）字都改成 `$canvas`，在亮色底上才看得清楚
+- `.graph-chart__node--checking` 寫在 SCSS 節點區塊的最後，才能蓋過填色規則裡的 `stroke`
+- 「有更新」和「沒更新」用同一個 amber，差別只看節點下方的距離數字有沒有變，以及左側說明
+- 左欄圖例 5 項全部列出：目前節點、檢查中的鄰居、等待中（queue）、已確認、最短路徑
+- 有顏色的邊（path / checking）在 GraphChart 裡會排序到最後才畫（`sortedEdges`），避免被灰色的邊蓋住
 - 權重標籤畫在邊的中點，沿法向量偏移 14px；法向量統一朝上，標籤不會一條在上、一條在下
 
 ## 共用程式碼的調整
@@ -282,10 +322,12 @@ skip / relax / update 中正在檢查的這條 → comparing
 
 ```ts
 interface LegendItem {
-  state: BarState | NodeState
+  state: BarState | GraphLegendState   // GraphLegendState = NodeState | 'checking'
   label: string
 }
 ```
+
+`checking` 不是節點填色，但圖例需要它，所以另外定義 `GraphLegendState`。
 
 排序頁不受影響。
 
@@ -331,7 +373,8 @@ function regenerate() {
 
 <InputPanel title="GRAPH DATA" data-label="起點 → 終點 / 節點" :data-text="graphInfo" ... />
 <GraphChart title="WEIGHTED GRAPH" :graph="graph" :dist="step.dist"
-            :node-states="step.nodeStates" :edge-states="step.edgeStates"
+            :node-states="step.nodeStates" :checking-node="step.checkingNode"
+            :edge-states="step.edgeStates"
             :visited-count="step.visitedCount" ... />
 <CodePanel file-name="dijkstra.js" language="JAVASCRIPT" :lines="DIJKSTRA_CODE" ... />
 ```
@@ -340,33 +383,36 @@ root class 為 `.dijkstra-page`（樣式內容與排序頁相同）。路由是 
 
 ## 實際步驟長相
 
-預設圖、A → G（`p` = path、`v` = visited、`f` = frontier、`c` = comparing、`d` = default，後面的數字是距離）：
+預設圖、A → G（`P` = current、`m` = queued、`c` = visited、`L` = path、`.` = default，`*` = 疊上 amber 外框，後面的數字是距離）：
 
 ```
-00 start   A:f0 B:d∞ C:d∞ D:d∞ E:d∞ F:d∞  G:d∞    從 A 到 G，準備開始
-01 visit   A:p0 B:d∞ C:d∞ D:d∞ E:d∞ F:d∞  G:d∞    取出 A，確定為 0
-02 update  A:p0 B:f4 C:d∞ D:d∞ E:d∞ F:d∞  G:d∞    經由 A 前往 B，更新為 4
-03 update  A:p0 B:f4 C:f2 D:d∞ E:d∞ F:d∞  G:d∞    經由 A 前往 C，更新為 2
-04 update  A:p0 B:f4 C:f2 D:f7 E:d∞ F:d∞  G:d∞    經由 A 前往 D，更新為 7
-05 visit   A:p0 B:f4 C:p2 D:f7 E:d∞ F:d∞  G:d∞    取出 C，確定為 2
-06 skip    A:c0 B:f4 C:p2 D:f7 E:d∞ F:d∞  G:d∞    A 已處理完成，跳過
-07 relax   A:p0 B:c4 C:p2 D:f7 E:d∞ F:d∞  G:d∞    檢查 C → B，不變
+00 start   Am 0  B. ∞  C. ∞  D. ∞  E. ∞  F. ∞  G. ∞    從 A 到 G，準備開始
+01 visit   AP 0  B. ∞  C. ∞  D. ∞  E. ∞  F. ∞  G. ∞    取出 A，確定為 0
+02 update  AP 0  Bm*4  C. ∞  D. ∞  E. ∞  F. ∞  G. ∞    經由 A 前往 B，更新為 4（邊 A-B amber）
+03 update  AP 0  Bm 4  Cm*2  D. ∞  E. ∞  F. ∞  G. ∞    經由 A 前往 C，更新為 2
+04 update  AP 0  Bm 4  Cm 2  Dm*7  E. ∞  F. ∞  G. ∞    經由 A 前往 D，更新為 7
+05 visit   Ac 0  Bm 4  CP 2  Dm 7  E. ∞  F. ∞  G. ∞    取出 C，A 變 cyan
+06 skip    Ac*0  Bm 4  CP 2  Dm 7  E. ∞  F. ∞  G. ∞    A 已確認，跳過（cyan + amber 外框）
+07 relax   Ac 0  Bm*4  CP 2  Dm 7  E. ∞  F. ∞  G. ∞    檢查 C → B，不變
 ...
-17 update  A:p0 B:p4 C:v2 D:f7 E:p5 F:f7  G:d∞    經由 E 前往 F，更新為 7
-...
-27 update  A:p0 B:p4 C:v2 D:v7 E:p5 F:p7  G:f10   經由 F 前往 G，更新為 10
-28 found   A:p0 B:p4 C:v2 D:v7 E:p5 F:p7  G:p10   取出終點 G，結束搜尋
-29 done    A:p0 B:p4 C:v2 D:v7 E:p5 F:p7  G:p10   最短路徑 A → B → E → F → G，總距離 10
+27 update  Ac 0  Bc 4  Cc 2  Dc 7  Ec 5  FP 7  Gm*10   經由 F 前往 G，更新為 10
+28 found   Ac 0  Bc 4  Cc 2  Dc 7  Ec 5  Fc 7  GP 10   取出終點 G，結束搜尋
+29 done    Ac 0  Bc 4  Cc 2  Dc 7  Ec 5  Fc 7  GL 10   回推到 G
+30 done    Ac 0  Bc 4  Cc 2  Dc 7  Ec 5  FL 7  GL 10   回推到 F（邊 F-G lime）
+31 done    Ac 0  Bc 4  Cc 2  Dc 7  EL 5  FL 7  GL 10   回推到 E
+32 done    Ac 0  BL 4  Cc 2  Dc 7  EL 5  FL 7  GL 10   回推到 B
+33 done    AL 0  BL 4  Cc 2  Dc 7  EL 5  FL 7  GL 10   最短路徑 A → B → E → F → G，總距離 10
 ```
 
-預設圖共 30 步（0–29）。G 剛好是離 A 最遠的節點，所以這張圖不會提早結束；換成較近的終點（例如 A → E）步驟會少很多。
+預設圖共 34 步（0–33）：搜尋 29 步 + 回推 5 步。G 剛好是離 A 最遠的節點，所以這張圖不會提早結束；換成較近的終點（例如 A → E）步驟會少很多。
 
 ## 驗證狀態
 
 - `npm run type-check`：通過
 - `npm run build-only`（vite build）：通過，SCSS 編譯正常
 - 腳本測試：通過。用 Node 直接跑：
-  - 預設圖逐步輸出，比對距離、節點與邊的狀態符合預期
+  - 預設圖逐步輸出，比對距離、節點填色、amber 外框與邊的狀態符合預期
+  - 隨機圖的每一組起點 × 終點都檢查顏色規則：搜尋過程中最多只有一個 current、完全沒有 path；最後一步起點與終點都是 path
   - 上方「已驗證的邊界情況」表格中的每一組
   - `toEdges(DIJKSTRA_DATA)` 剛好整理出 12 條邊，權重與設計稿一致
   - `createRandomData()` 跑 200 次，每次都是 12 條邊，且每條邊兩個方向的權重相同

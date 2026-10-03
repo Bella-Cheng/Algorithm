@@ -134,17 +134,25 @@
     }
 
     // Dijkstra 節點狀態
-    &--path {
-      background: $accent-lime;
+    &--current {
+      background: $accent-pink;
+    }
+
+    &--checking {
+      border: 2px solid $accent-amber;
+      background: transparent;
+    }
+
+    &--queued {
+      background: $text-muted;
     }
 
     &--visited {
       background: $accent-cyan;
     }
 
-    &--frontier {
-      border: 2px solid $accent-amber;
-      background: transparent;
+    &--path {
+      background: $accent-lime;
     }
   }
 }
