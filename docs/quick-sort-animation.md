@@ -4,7 +4,7 @@
 
 記錄快速排序頁面（`src/page/QuickSortPage.vue`）的架構、步驟產生規則與新增的顏色狀態。
 
-這是第二個使用同一套播放架構的頁面，**共用的部分（資料流、`useStepPlayer`、各元件 props、ToolLayout slot）不再重複說明**，請先看 [bubble-sort-animation.md](./bubble-sort-animation.md)；版面殼請看 [layout-architecture.md](./layout-architecture.md)。本文只記錄快速排序特有的部分，以及為了它而調整的共用程式碼。
+這是第二個使用同一套渲染架構的頁面，**共用的部分（資料流、各元件 props）不再重複說明**，請先看 [bubble-sort-animation.md](./bubble-sort-animation.md)；版面殼請看 [layout-architecture.md](./layout-architecture.md)。本文只記錄快速排序特有的部分，以及為了它而調整的共用程式碼。
 
 ## 這次新增 / 改動的檔案
 
@@ -17,7 +17,7 @@ src/scss/BarChart.scss             // 新增 --less（cyan）、--greater（text
 src/scss/InputPanel.scss           // 新增對應的圖例圓點顏色
 ```
 
-`BarChart`、`CodePanel`、`ToolFooter`、`ToolLayout`、`useStepPlayer` 完全沒有改。
+`BarChart`、`CodePanel`、`ToolLayout` 完全沒有改。
 
 ## 演算法選擇：Lomuto 分割（in-place）
 
@@ -45,7 +45,7 @@ function quickSort(arr: number[], low = 0, high = arr.length - 1) {   // 1
 
 好處：
 
-- 陣列長度與每根長條的位置從頭到尾固定，動畫可以連續播放
+- 陣列長度與每根長條的位置從頭到尾固定，每一步的畫面可以連續銜接
 - 右側 `QUICK_SORT_CODE` 顯示的就是實際跑的邏輯，高亮行才有意義
 - 空間複雜度確實是 `O(log n)`（只有遞迴堆疊），跟 ToolHeader 標示一致
 
@@ -202,7 +202,7 @@ root class 為 `.quick-sort-page`（樣式內容與 `.bubble-sort-page` 相同�
   - 最後一步所有長條都是 `sorted`
   - 每一步 `arr.length === barStates.length`
   - 每一步的數字集合沒有增減（交換沒寫壞）
-- 瀏覽器實際播放：尚未確認
+- 瀏覽器實際畫面：尚未確認
 
 ## 後續待辦（Not in scope）
 

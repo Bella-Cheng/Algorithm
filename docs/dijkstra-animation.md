@@ -4,7 +4,7 @@
 
 記錄 Dijkstra 頁面（`src/page/DijkstraPage.vue`）的架構、演算法、步驟產生規則、節點 / 邊的顏色狀態，以及為了它而調整的共用程式碼。
 
-這是第一個**圖論**頁面，播放架構（`useStepPlayer`、`ToolFooter`、`CodePanel`、ToolLayout slot）和排序頁完全相同，**共用的部分不再重複說明**，請先看 [bubble-sort-animation.md](./bubble-sort-animation.md)；版面殼請看 [layout-architecture.md](./layout-architecture.md)。本文只記錄 Dijkstra 特有的部分。
+這是第一個**圖論**頁面，渲染架構（步驟快照、`CodePanel`）和排序頁完全相同，**共用的部分不再重複說明**，請先看 [bubble-sort-animation.md](./bubble-sort-animation.md)；版面殼請看 [layout-architecture.md](./layout-architecture.md)。本文只記錄 Dijkstra 特有的部分。
 
 ## 這次新增 / 改動的檔案
 
@@ -20,7 +20,7 @@ src/component/InputPanel.vue       // 新增 title / dataLabel / dataText props
 src/scss/InputPanel.scss           // 新增 current / checking / queued / visited / path 圖例顏色；資料文字支援換行
 ```
 
-`BarChart`、`CodePanel`、`ToolFooter`、`ToolHeader`、`ToolLayout`、`useStepPlayer` 完全沒有改。
+`BarChart`、`CodePanel`、`ToolHeader`、`ToolLayout` 完全沒有改。
 
 ## 預設圖
 
@@ -415,7 +415,7 @@ root class 為 `.dijkstra-page`（樣式內容與排序頁相同）。路由是 
   - `toEdges(DIJKSTRA_DATA)` 剛好整理出 12 條邊，權重與設計稿一致
   - `createRandomData()` 跑 200 次，每次都是 12 條邊，且每條邊兩個方向的權重相同
   - 用 `createRandomData()` 隨機產生 300 張圖，**每一組起點 × 終點**（49 組，共 14,700 組）都檢查：`distance` 等於 Bellman-Ford 暴力解、`route` 頭尾正確且邊權重加總等於 `distance`、步驟最後一步是 `done`
-- 瀏覽器實際播放：尚未確認
+- 瀏覽器實際畫面：尚未確認
 
 ## 後續待辦（Not in scope）
 

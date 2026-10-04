@@ -112,7 +112,7 @@ function regenerate() {
       <template #right>
         <CodePanel
           file-name="dijkstra.js"
-          language="JAVASCRIPT"
+          language="TYPESCRIPT"
           :lines="DIJKSTRA_CODE"
           :highlight-lines="step.highlightLines"
           :status-label="`${DIJKSTRA_PHASE_LABEL[step.phase]} ${step.focus}`"
