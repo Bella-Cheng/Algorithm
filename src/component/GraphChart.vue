@@ -6,8 +6,6 @@ import type { EdgeState, Graph, NodeState } from '@/types/graph'
 const props = withDefaults(
   defineProps<{
     graph: Graph
-    /** 每個節點目前的距離，null 顯示 ∞ */
-    dist?: Record<string, number | null>
     nodeStates?: Record<string, NodeState>
     /** 正在被檢查的鄰居，疊一圈 amber 外框 */
     checkingNode?: string | null
@@ -21,7 +19,6 @@ const props = withDefaults(
     message?: string
   }>(),
   {
-    dist: () => ({}),
     nodeStates: () => ({}),
     checkingNode: null,
     edgeStates: () => ({}),
@@ -76,11 +73,6 @@ const sortedEdges = computed(() => {
   return [...edges.value].sort((a, b) => isHighlighted(a.key) - isHighlighted(b.key))
 })
 
-function formatDist(id: string) {
-  const value = props.dist[id]
-  return value === null || value === undefined ? '∞' : String(value)
-}
-
 function pad(value: number) {
   return String(value).padStart(2, '0')
 }
@@ -118,9 +110,6 @@ function pad(value: number) {
         >
           <circle :cx="node.x" :cy="node.y" :r="NODE_RADIUS" />
           <text :x="node.x" :y="node.y" class="graph-chart__node-label">{{ node.id }}</text>
-          <text :x="node.x" :y="node.y + NODE_RADIUS + 24" class="graph-chart__dist">
-            {{ formatDist(node.id) }}
-          </text>
         </g>
       </svg>
     </div>

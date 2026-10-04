@@ -269,8 +269,8 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
    * - path：回推最短路徑時，已經亮起來的節點（lime）
    */
   const snapshot = (
-    { table, visited, queue }: DijkstraState,
-    step: Omit<DijkstraStep, 'dist' | 'nodeStates' | 'checkingNode' | 'edgeStates' | 'visitedCount'>,
+    { visited, queue }: DijkstraState,
+    step: Omit<DijkstraStep, 'nodeStates' | 'checkingNode' | 'edgeStates' | 'visitedCount'>,
     {
       current = null,
       checking,
@@ -288,11 +288,8 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
       pathEdges.add(edgeKey(path[i - 1]!, path[i]!))
     }
 
-    const dist: Record<string, number | null> = {}
     const nodeStates: Record<string, NodeState> = {}
     for (const id in data) {
-      const distance = table.get(id)?.distance ?? Infinity
-      dist[id] = distance === Infinity ? null : distance
       if (pathNodes.has(id)) nodeStates[id] = 'path'
       else if (id === current) nodeStates[id] = 'current'
       else if (visited.has(id)) nodeStates[id] = 'visited'
@@ -311,7 +308,6 @@ export function createDijkstraSteps(data: DijkstraGraph, start: string, end: str
 
     steps.push({
       ...step,
-      dist,
       nodeStates,
       checkingNode: checking?.next ?? null,
       edgeStates,

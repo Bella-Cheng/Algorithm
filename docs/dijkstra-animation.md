@@ -12,7 +12,7 @@
 src/types/graph.ts                 // 新增：Graph / GraphStep 型別、NodeState / EdgeState、edgeKey()
 src/algorithms/dijkstra.ts         // 新增：dijkstra() 本體 + 步驟產生器 + 程式碼常數 + 預設圖
 src/component/GraphChart.vue       // 新增：SVG 加權圖視覺化（取代 BarChart 的位置）
-src/scss/GraphChart.scss           // 新增：節點、邊、權重、距離標籤樣式
+src/scss/GraphChart.scss           // 新增：節點、邊、權重樣式
 src/page/DijkstraPage.vue          // 新增：頁面組合
 src/router/index.ts                // 新增 /Dijkstra 路由
 src/types/sort.ts                  // LegendItem.state 放寬為 BarState | GraphLegendState
@@ -72,7 +72,7 @@ DIJKSTRA_DATA（鄰接表，每條邊寫兩次）
 - 起點 `DEFAULT_START = 'A'`、終點 `DEFAULT_END = 'G'`
 - 頁面只會把 `data` 整個換成新物件，不會去改 `DIJKSTRA_DATA` 本身
 
-⚠️ 節點座標要留空間給距離標籤（畫在節點下方 `r + 24`），最下面的節點 y 不要超過約 450，最上面的節點 y 不要小於約 40（半徑 34）。
+⚠️ 節點半徑 34，節點座標離 viewBox 邊界至少要 40 左右，圓圈才不會被切掉。
 
 ## 演算法：`dijkstra(data, startNode, endNode, onStep?)`
 
@@ -207,7 +207,7 @@ function dijkstra(data, startNode, endNode) {                            // 1
 
 其他規則：
 
-- `onStep` 收到的 `state` 是**同一份參考**，快照時要把需要的值複製出來（`snapshot()` 會建立新的 `dist` / `nodeStates` / `edgeStates` 物件）
+- `onStep` 收到的 `state` 是**同一份參考**，快照時要把需要的值複製出來（`snapshot()` 會建立新的 `nodeStates` / `edgeStates` 物件）
 - `focus` 是這一步的主角節點，顯示在左側卡片標籤與程式碼面板狀態列，例如 `VISIT  D  /  05`、`UPDATE D`；回推步驟的 focus 是目前回推到的節點
 - 卡片標籤最後的數字是**已處理完成的節點數**（`visitedCount = visited.size`），和視覺化標題列的 `VISITED 05 / 07` 一致
 - 鄰居的檢查順序就是 `DIJKSTRA_DATA` 裡寫的順序，例如 A 會依序檢查 B、C、D
@@ -218,7 +218,6 @@ function dijkstra(data, startNode, endNode) {                            // 1
 
 | 欄位 | 意義 |
 | --- | --- |
-| `dist` | 每個節點目前的距離，`Infinity` 轉成 `null`（畫面顯示 `∞`） |
 | `nodeStates` | 每個節點的填色 |
 | `checkingNode` | 正在被檢查的鄰居（畫 amber 外框），沒有時為 `null` |
 | `edgeStates` | 每條邊的顯示狀態，key 由 `edgeKey(a, b)` 產生 |
@@ -280,16 +279,15 @@ current → checking 的邊  → checking  （amber）
 | Prop | 型別 | 說明 |
 | --- | --- | --- |
 | `graph` | `Graph` | 必填，節點座標與無向邊 |
-| `dist` | `Record<string, number \| null>` | 節點下方的距離，`null` 顯示 `∞` |
 | `nodeStates` | `Record<string, NodeState>` | 節點填色，沒給的節點視為 `default` |
-| `checkingNode` | `string \| null` | 疊一圈 amber 外框的節點，距離數字也變 amber |
+| `checkingNode` | `string \| null` | 疊一圈 amber 外框的節點 |
 | `edgeStates` | `Record<string, EdgeState>` | 邊狀態，key 為 `edgeKey(from, to)` |
 | `title` | `string` | 標題列 `VISUALIZATION / {title}` |
 | `visitedCount` | `number` | 右上角 `VISITED 05 / 07`，分母是節點總數 |
 | `currentStep` | `number` | 說明框左側的步驟編號 |
 | `message` | `string` | 說明框文字，支援 `\n` 換行 |
 
-- 節點半徑 34，距離標籤畫在節點下方 `r + 24`
+- 節點半徑 34，只畫圓圈、節點名稱、線與權重，**不顯示節點的距離**（距離的變化看左側與下方說明）
 - 元件只負責畫，**不知道演算法**，之後其他圖論演算法（BFS、Prim…）可以直接沿用，只要產生自己的 `nodeStates` / `edgeStates`
 
 ## 顏色規則
@@ -299,7 +297,7 @@ current → checking 的邊  → checking  （amber）
 | 狀態 | 意義 | 節點 | 邊 |
 | --- | --- | --- | --- |
 | `current` | 目前正在處理的節點 | `$accent-pink` 實心 | — |
-| `checking` | 目前節點正在檢查的鄰居 | `$accent-amber` 外框（5px），可疊在任何填色上；距離數字也變 amber | `$accent-amber` 線與權重數字 |
+| `checking` | 目前節點正在檢查的鄰居 | `$accent-amber` 外框（5px），可疊在任何填色上 | `$accent-amber` 線與權重數字 |
 | `queued` | 在 queue 裡等待處理 | `$text-muted` 實心 | — |
 | `visited` | 已確認最短距離 | `$accent-cyan` 實心 | — |
 | `path` | 最後回推出的最短路徑 | `$accent-lime` 實心 | `$accent-lime` 粗線（5px） |
@@ -311,7 +309,7 @@ current → checking 的邊  → checking  （amber）
 
 - 實心的節點（current / queued / visited / path）字都改成 `$canvas`，在亮色底上才看得清楚
 - `.graph-chart__node--checking` 寫在 SCSS 節點區塊的最後，才能蓋過填色規則裡的 `stroke`
-- 「有更新」和「沒更新」用同一個 amber，差別只看節點下方的距離數字有沒有變，以及左側說明
+- 「有更新」和「沒更新」用同一個 amber，差別看左側與下方說明
 - 左欄圖例 5 項全部列出：目前節點、檢查中的鄰居、等待中（queue）、已確認、最短路徑
 - 有顏色的邊（path / checking）在 GraphChart 裡會排序到最後才畫（`sortedEdges`），避免被灰色的邊蓋住
 - 權重標籤畫在邊的中點，沿法向量偏移 14px；法向量統一朝上，標籤不會一條在上、一條在下
@@ -372,7 +370,7 @@ function regenerate() {
             status-label="WEIGHT" status-value="≥ 0" status-variant="primary" />
 
 <InputPanel title="GRAPH DATA" data-label="起點 → 終點 / 節點" :data-text="graphInfo" ... />
-<GraphChart title="WEIGHTED GRAPH" :graph="graph" :dist="step.dist"
+<GraphChart title="WEIGHTED GRAPH" :graph="graph"
             :node-states="step.nodeStates" :checking-node="step.checkingNode"
             :edge-states="step.edgeStates"
             :visited-count="step.visitedCount" ... />

@@ -77,7 +77,7 @@
   &__weight {
     fill: $text-muted;
     font-family: $font-mono;
-    font-size: 13px;
+    font-size: 16px;
     text-anchor: middle;
     dominant-baseline: middle;
     transition: fill 0.25s ease;
@@ -128,15 +128,9 @@
     }
 
     // 正在被檢查的鄰居：疊在任何填色上的 amber 外框，寫在最後才能蓋過上面的 stroke
-    &--checking {
-      circle {
-        stroke: $accent-amber;
-        stroke-width: 5;
-      }
-
-      .graph-chart__dist {
-        fill: $accent-amber;
-      }
+    &--checking circle {
+      stroke: $accent-amber;
+      stroke-width: 5;
     }
   }
 
@@ -148,14 +142,6 @@
     text-anchor: middle;
     dominant-baseline: central;
     transition: fill 0.25s ease;
-  }
-
-  &__dist {
-    fill: $text-muted;
-    font-family: $font-mono;
-    font-size: 13px;
-    text-anchor: middle;
-    dominant-baseline: middle;
   }
 
   &__footer {

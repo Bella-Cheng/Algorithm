@@ -42,8 +42,6 @@ export interface Graph {
 
 /** Dijkstra 動畫的單一步驟快照 */
 export interface GraphStep<Phase extends string = string> {
-  /** 每個節點目前的距離，尚未抵達為 null（畫面顯示 ∞） */
-  dist: Record<string, number | null>
   nodeStates: Record<string, NodeState>
   /** 正在被檢查的鄰居（畫 amber 外框），沒有時為 null */
   checkingNode: string | null
