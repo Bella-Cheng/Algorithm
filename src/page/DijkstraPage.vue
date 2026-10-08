@@ -25,7 +25,7 @@ import type { LegendItem } from '@/types/sort'
 const LEGENDS: LegendItem[] = [
   { state: 'current', label: '目前節點' },
   { state: 'checking', label: '檢查中的鄰居' },
-  { state: 'queued', label: '等待中（queue）' },
+  { state: 'queued', label: '等待中' },
   { state: 'visited', label: '已確認' },
   { state: 'path', label: '最短路徑' },
 ]

@@ -32,7 +32,7 @@ const MAX_VALUE = 100
 const LEGENDS: LegendItem[] = [
   { state: 'active', label: '基準值 pivot' },
   { state: 'comparing', label: '比較中' },
-  { state: 'less', label: '小於 pivot・已定位' },
+  { state: 'less', label: '已定位' },
   { state: 'greater', label: '大於 pivot' },
   { state: 'default', label: '尚未處理' },
 ]

@@ -146,6 +146,7 @@
 
   &__footer {
     display: flex;
+    flex-shrink: 0;
     min-height: 96px;
     gap: 40px;
     padding: 20px 28px;

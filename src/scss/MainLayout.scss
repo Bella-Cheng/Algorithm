@@ -1,6 +1,7 @@
 .main-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh; // 固定一個畫面高，工具頁的播放器才不會被擠出畫面
   flex-direction: column;
 
   &__content {
@@ -8,5 +9,6 @@
     flex: 1;
     flex-direction: column;
     min-height: 0;
+    overflow-y: auto; // 首頁等較長的頁面改在內容區捲動
   }
 }
