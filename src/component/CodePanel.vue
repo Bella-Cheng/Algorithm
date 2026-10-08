@@ -1,5 +1,7 @@
 <script setup lang="ts">
-withDefaults(
+import { nextTick, ref, watch } from 'vue'
+
+const props = withDefaults(
   defineProps<{
     fileName: string
     language?: string
@@ -20,6 +22,39 @@ withDefaults(
     statusMeta: '',
   },
 )
+
+const bodyRef = ref<HTMLOListElement | null>(null)
+
+/** 高亮行不在可視範圍時，只捲動程式碼區塊，把它們移到中間 */
+function scrollToActive() {
+  const body = bodyRef.value
+  if (!body) return
+
+  const activeLines = body.querySelectorAll<HTMLElement>('.code-panel__line--active')
+  const first = activeLines[0]
+  const last = activeLines[activeLines.length - 1]
+  if (!first || !last) return
+
+  const bodyRect = body.getBoundingClientRect()
+  const top = first.getBoundingClientRect().top - bodyRect.top
+  const bottom = last.getBoundingClientRect().bottom - bodyRect.top
+  if (top >= 0 && bottom <= body.clientHeight) return
+
+  // 範圍比可視區還高時，對齊第一行；否則置中
+  const rangeHeight = bottom - top
+  const offset = rangeHeight > body.clientHeight ? 16 : (body.clientHeight - rangeHeight) / 2
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  body.scrollTo({
+    top: body.scrollTop + top - offset,
+    behavior: reduceMotion ? 'auto' : 'smooth',
+  })
+}
+
+watch(
+  () => props.highlightLines.join(','),
+  () => nextTick(scrollToActive),
+)
 </script>
 
 <template>
@@ -29,7 +64,7 @@ withDefaults(
       <span class="code-panel__language">{{ language }}</span>
     </div>
 
-    <ol class="code-panel__body">
+    <ol ref="bodyRef" class="code-panel__body">
       <li
         v-for="(line, index) in lines"
         :key="index"
