@@ -1,20 +1,27 @@
+// 整張卡片就是 SelectTrigger（button）
 .select-field {
-  position: relative; // 讓透明 select 蓋滿整張卡片，點哪裡都能打開選單
   display: flex;
+  width: 100%;
   flex-direction: column;
   gap: 4px;
   padding: 9px 12px;
   border: $border-width solid $border;
   border-radius: $radius-md;
   background: $surface-raised;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
   transition: border-color 160ms ease;
 
   &:hover {
     border-color: rgba($accent-lime, 0.4);
   }
 
-  &:focus-within {
+  &:focus-visible,
+  &[data-state='open'] {
     border-color: $accent-lime;
+    outline: none;
   }
 
   &__label {
@@ -24,6 +31,7 @@
 
   &__control {
     display: flex;
+    width: 100%;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
@@ -44,15 +52,5 @@
     height: 8px;
     flex-shrink: 0;
     fill: currentColor;
-  }
-
-  &__select {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    appearance: none;
   }
 }
