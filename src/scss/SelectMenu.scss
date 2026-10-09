@@ -1,0 +1,36 @@
+// SelectMenu 的下拉選單（資料彈窗的欄位、控制列的速度都用這個）
+// 選單由 SelectPortal 搬到 body，Reka UI 不會把 scoped 屬性帶過去，所以這個檔案不加 scoped
+.select-menu {
+  z-index: 110; // 要蓋過 DataModal（100）
+  min-width: max(88px, var(--reka-select-trigger-width));
+  max-height: min(240px, var(--reka-select-content-available-height));
+  overflow: hidden;
+  padding: 4px;
+  border: $border-width solid $border;
+  border-radius: 12px;
+  background: $canvas;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  &__option {
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: $text-muted;
+    cursor: pointer;
+    font-family: $font-mono;
+    font-size: 12px;
+    font-weight: 600;
+    outline: none;
+
+    // 滑鼠移上去或鍵盤指到
+    &[data-highlighted] {
+      background: $surface;
+      color: $text-primary;
+    }
+
+    // 目前選中的值
+    &[data-state='checked'] {
+      background: $color-primary;
+      color: $canvas;
+    }
+  }
+}

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed } from 'vue'
+import SelectMenu from '@/component/SelectMenu.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     currentStep?: number
     totalSteps?: number
@@ -31,22 +32,15 @@ function formatSpeed(speed: number) {
   return `${speed.toFixed(1)}×`
 }
 
-/** 速度下拉選單 */
-const speedMenuOpen = ref(false)
-const speedRef = ref<HTMLElement>()
+/** 手機版速度選單的選項 */
+const speedMenuOptions = computed(() =>
+  props.speedOptions.map((speed) => ({ label: formatSpeed(speed), value: speed })),
+)
 
-function selectSpeed(speed: number) {
-  emit('changeSpeed', speed)
-  speedMenuOpen.value = false
-}
-
-/** 點選單外面時關閉 */
-function onDocumentPointerDown(event: PointerEvent) {
-  if (!speedRef.value?.contains(event.target as Node)) speedMenuOpen.value = false
-}
-
-onMounted(() => document.addEventListener('pointerdown', onDocumentPointerDown))
-onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPointerDown))
+const speedModel = computed({
+  get: () => props.activeSpeed,
+  set: (speed: number) => emit('changeSpeed', speed),
+})
 </script>
 
 <template>
@@ -109,32 +103,17 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPoin
     </div>
 
     <!-- 手機：速度下拉選單 -->
-    <div ref="speedRef" class="tool-footer__speed-dropdown">
-      <button
-        type="button"
-        class="tool-footer__speed-trigger"
-        aria-haspopup="listbox"
-        :aria-expanded="speedMenuOpen"
-        :aria-label="`播放速度 ${formatSpeed(activeSpeed)}`"
-        @click="speedMenuOpen = !speedMenuOpen"
-      >
-        {{ formatSpeed(activeSpeed) }}
-      </button>
-
-      <ul v-if="speedMenuOpen" class="tool-footer__speed-menu" role="listbox">
-        <li v-for="speed in speedOptions" :key="speed">
-          <button
-            type="button"
-            role="option"
-            class="tool-footer__speed-option"
-            :class="{ 'tool-footer__speed-option--active': speed === activeSpeed }"
-            :aria-selected="speed === activeSpeed"
-            @click="selectSpeed(speed)"
-          >
-            {{ formatSpeed(speed) }}
-          </button>
-        </li>
-      </ul>
+    <div class="tool-footer__speed-dropdown">
+      <!-- 控制列在畫面底部，選單往上展開 -->
+      <SelectMenu v-model="speedModel" :options="speedMenuOptions" side="top" align="end">
+        <button
+          type="button"
+          class="tool-footer__speed-trigger"
+          :aria-label="`播放速度 ${formatSpeed(activeSpeed)}`"
+        >
+          {{ formatSpeed(activeSpeed) }}
+        </button>
+      </SelectMenu>
     </div>
   </footer>
 </template>
