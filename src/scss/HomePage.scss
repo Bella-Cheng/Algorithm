@@ -1,0 +1,239 @@
+.home {
+  display: flex;
+  flex-direction: column;
+
+  // -------------------------------------------------------------------------
+  // Hero
+  // -------------------------------------------------------------------------
+
+  &__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: 64px;
+    padding: 72px 80px 80px;
+  }
+
+  &__eyebrow {
+    color: $accent-lime;
+    font-family: $font-mono;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  &__headline {
+    margin-top: 24px;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  &__lead {
+    margin-top: 48px;
+    color: $text-muted;
+    font-size: 15px;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  &__btn {
+    display: inline-flex;
+    height: 40px;
+    align-items: center;
+    padding-inline: 28px;
+    border-radius: $radius-pill;
+    color: $text-primary;
+    background: $surface-raised;
+    font-size: 13px;
+    font-weight: 700;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+
+    &:hover {
+      color: $accent-lime;
+      background: $accent-lime-dim;
+      text-decoration: none;
+    }
+
+    &--primary,
+    &--primary:hover {
+      color: $canvas;
+      background: $accent-lime;
+    }
+  }
+
+  // Hero 右側：自動播放的長條圖
+  &__live {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px 22px;
+    border: $border-width solid $border;
+    border-radius: 20px;
+    background: $surface;
+  }
+
+  &__live-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  &__live-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: $accent-lime;
+
+    &::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      content: '';
+      animation: home-pulse 1.4s ease-in-out infinite;
+    }
+
+    &--done {
+      color: $accent-cyan;
+
+      &::before {
+        animation: none;
+      }
+    }
+  }
+
+  // BarCanvas 的高度與間距由這層決定
+  &__live-bars {
+    height: 300px;
+    margin-top: 8px;
+    --bar-gap: 16px;
+  }
+
+  &__live-caption {
+    color: $text-primary;
+    font-family: $font-mono;
+    font-size: 12px;
+  }
+
+  // -------------------------------------------------------------------------
+  // 演算法模組
+  // -------------------------------------------------------------------------
+
+  &__modules {
+    padding: 40px 80px 36px;
+    background: $surface;
+  }
+
+  &__modules-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  &__modules-title {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  &__modules-count {
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  &__cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  // 排序卡片的小長條
+  &__mini-bars {
+    --bar-gap: 8px;
+    --bar-radius: 4px;
+  }
+
+  // Dijkstra 卡片的小圖，撐滿預覽區高度並置中
+  &__graph {
+    width: auto;
+    height: 100%;
+    margin-inline: auto;
+  }
+}
+
+@keyframes home-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+// 平板：Hero 上下排列
+@media (max-width: $breakpoint-tablet) {
+  .home {
+    &__hero {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      padding: 56px 32px;
+    }
+
+    &__modules {
+      padding-inline: 32px;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .home {
+    &__hero {
+      gap: 32px;
+      padding: 40px 16px;
+    }
+
+    &__headline {
+      margin-top: 16px;
+      font-size: 36px;
+    }
+
+    &__lead {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    &__live {
+      padding: 18px 16px;
+    }
+
+    &__live-bars {
+      height: 200px;
+      --bar-gap: 6px;
+    }
+
+    &__modules {
+      padding: 32px 16px;
+    }
+
+    &__modules-title {
+      font-size: 18px;
+    }
+
+    &__cards {
+      grid-template-columns: 1fr;
+      margin-top: 20px;
+    }
+  }
+}

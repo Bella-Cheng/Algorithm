@@ -10,5 +10,6 @@
     flex-direction: column;
     min-height: 0;
     overflow-y: auto; // 首頁等較長的頁面改在內容區捲動
+    scroll-behavior: smooth; // 點 #錨點 時平滑捲動
   }
 }

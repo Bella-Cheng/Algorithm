@@ -1,0 +1,76 @@
+.algorithm-card {
+  // 各變體只改這個變數
+  --card-accent: #{$accent-lime};
+
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px;
+  border: $border-width solid $border;
+  border-radius: $radius-lg;
+  color: $text-primary;
+  background: $surface-raised;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+
+  &:hover {
+    border-color: var(--card-accent);
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+
+  &--cyan {
+    --card-accent: #{$accent-cyan};
+  }
+
+  &--amber {
+    --card-accent: #{$accent-amber};
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: $font-mono;
+    font-size: 11px;
+  }
+
+  &__index {
+    color: var(--card-accent);
+    font-weight: 600;
+  }
+
+  &__complexity {
+    color: $text-muted;
+  }
+
+  &__title {
+    margin-top: 24px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  &__desc {
+    margin-top: 8px;
+    color: $text-muted;
+    font-size: 13px;
+  }
+
+  &__preview {
+    display: flex;
+    height: 120px;
+    align-items: flex-end;
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .algorithm-card {
+    padding: 20px 16px;
+
+    &__title {
+      margin-top: 16px;
+      font-size: 18px;
+    }
+  }
+}

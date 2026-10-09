@@ -73,6 +73,24 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
+
+  &__btn {
+    display: inline-flex;
+    height: 36px;
+    align-items: center;
+    padding-inline: 28px;
+    border-radius: $radius-pill;
+    color: $canvas;
+    background: $color-primary;
+    font-size: 13px;
+    font-weight: 700;
+    transition: opacity 160ms ease;
+
+    &:hover {
+      opacity: 0.88;
+      text-decoration: none;
+    }
+  }
 }
 
 @media (max-width: $breakpoint-mobile) {
@@ -101,6 +119,12 @@
 
     &__badge {
       display: none;
+    }
+
+    &__btn {
+      height: 32px;
+      padding-inline: 18px;
+      font-size: 12px;
     }
   }
 }
