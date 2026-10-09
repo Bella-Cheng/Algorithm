@@ -102,3 +102,19 @@
     font-size: 11px;
   }
 }
+
+@media (max-width: $breakpoint-mobile) {
+  .code-panel {
+    &__header {
+      padding: 10px 16px;
+    }
+
+    &__body {
+      padding: 8px 0;
+    }
+
+    &__line {
+      padding-inline: 16px;
+    }
+  }
+}

@@ -32,4 +32,93 @@
     overflow: hidden;
     background: $surface;
   }
+
+  &__player {
+    flex-shrink: 0;
+  }
+
+  // 只有手機版會用到
+  &__tabs {
+    display: none;
+  }
+}
+
+// 平板：左右欄位縮窄，讓圖表有足夠空間
+@media (max-width: $breakpoint-tablet) {
+  .tool-layout__sidebar {
+    width: 240px;
+
+    &--right {
+      width: 300px;
+    }
+  }
+}
+
+// 手機：圖表在上、切換按鈕、下方面板；播放器疊在圖表底部
+@media (max-width: $breakpoint-mobile) {
+  .tool-layout {
+    display: grid;
+    grid-template-areas:
+      'main'
+      'tabs'
+      'panel';
+    grid-template-rows: minmax(0, 1.15fr) auto minmax(0, 1fr);
+
+    &__body {
+      display: contents;
+    }
+
+    &__main {
+      position: relative;
+      grid-area: main;
+    }
+
+    &__sidebar {
+      grid-area: panel;
+      width: auto;
+      min-height: 0;
+
+      &--left,
+      &--right {
+        width: auto;
+        border: none;
+      }
+
+      &--inactive {
+        display: none;
+      }
+    }
+
+    &__player {
+      z-index: 1;
+      grid-area: main;
+      align-self: end;
+    }
+
+    &__tabs {
+      display: flex;
+      grid-area: tabs;
+      gap: 8px;
+      padding: 10px 16px;
+      border-block: $border-width solid $border;
+      background: $canvas;
+    }
+
+    &__tab {
+      flex: 1;
+      height: 36px;
+      border: $border-width solid $border;
+      border-radius: $radius-pill;
+      background: $surface;
+      color: $text-muted;
+      font-size: 13px;
+      font-weight: 700;
+
+      &--active {
+        border-color: transparent;
+        background: $color-primary-soft;
+        color: $color-primary;
+      }
+    }
+  }
 }

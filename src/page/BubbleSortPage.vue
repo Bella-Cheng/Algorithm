@@ -87,7 +87,7 @@ function regenerate() {
       status-variant="primary"
     />
 
-    <ToolLayout>
+    <ToolLayout @regenerate="openModal">
       <template #left>
         <InputPanel
           :arr="arr"

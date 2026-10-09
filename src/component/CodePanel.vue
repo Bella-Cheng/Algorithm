@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -55,6 +55,22 @@ watch(
   () => props.highlightLines.join(','),
   () => nextTick(scrollToActive),
 )
+
+/** 手機版從隱藏的分頁切回來時，面板高度從 0 變回來，再捲一次 */
+let resizeObserver: ResizeObserver | undefined
+let lastHeight = 0
+
+onMounted(() => {
+  if (!bodyRef.value) return
+  resizeObserver = new ResizeObserver(([entry]) => {
+    const height = entry?.contentRect.height ?? 0
+    if (lastHeight === 0 && height > 0) scrollToActive()
+    lastHeight = height
+  })
+  resizeObserver.observe(bodyRef.value)
+})
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>
 
 <template>

@@ -107,3 +107,67 @@
     color: $color-warning;
   }
 }
+
+// 平板：標題與標籤放不下時換行
+@media (max-width: $breakpoint-tablet) {
+  .tool-header {
+    flex-wrap: wrap;
+    gap: 10px 24px;
+  }
+}
+
+// 手機：標題一行、複雜度標籤一行（可橫向滑動）
+@media (max-width: $breakpoint-mobile) {
+  .tool-header {
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 16px;
+
+    &__meta {
+      gap: 10px;
+    }
+
+    &__index {
+      font-size: 11px;
+    }
+
+    &__title {
+      font-size: 18px;
+    }
+
+    &__subtitle {
+      overflow: hidden;
+      flex-shrink: 1;
+      font-size: 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__stats {
+      overflow-x: auto;
+      gap: 6px;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__chip {
+      flex-shrink: 0;
+      height: 26px;
+      gap: 6px;
+      padding-inline: 10px;
+    }
+
+    &__chip-label {
+      font-size: 10px;
+    }
+
+    &__chip-value {
+      font-size: 11px;
+    }
+  }
+}

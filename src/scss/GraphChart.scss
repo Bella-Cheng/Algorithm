@@ -171,3 +171,33 @@
     }
   }
 }
+
+@media (max-width: $breakpoint-mobile) {
+  .graph-chart {
+    gap: 8px;
+    padding: 14px 16px $player-overlay-height; // 底部留給疊上來的播放器
+
+    &__header {
+      gap: 8px;
+    }
+
+    &__title {
+      overflow: hidden;
+      min-width: 0;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__visited {
+      flex-shrink: 0;
+      padding: 6px 12px;
+      font-size: 11px;
+    }
+
+    // 詳細說明在手機版隱藏，避免被播放器蓋住
+    &__footer {
+      display: none;
+    }
+  }
+}

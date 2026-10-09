@@ -83,7 +83,7 @@ function regenerate() {
       status-variant="primary"
     />
 
-    <ToolLayout>
+    <ToolLayout @regenerate="regenerate">
       <template #left>
         <InputPanel
           title="GRAPH DATA"

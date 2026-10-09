@@ -74,3 +74,33 @@
     text-transform: uppercase;
   }
 }
+
+@media (max-width: $breakpoint-mobile) {
+  .app-header {
+    height: 56px;
+    flex-shrink: 0;
+    padding-inline: 16px;
+
+    &__logo {
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+    }
+
+    &__title {
+      font-size: 13px;
+    }
+
+    &__nav {
+      gap: 16px;
+    }
+
+    &__link {
+      font-size: 13px;
+    }
+
+    &__badge {
+      display: none;
+    }
+  }
+}

@@ -104,7 +104,7 @@ function regenerate() {
       status-variant="comparing"
     />
 
-    <ToolLayout>
+    <ToolLayout @regenerate="openModal">
       <template #left>
         <InputPanel
           :arr="arr"

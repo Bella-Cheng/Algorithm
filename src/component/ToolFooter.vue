@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+
 withDefaults(
   defineProps<{
     currentStep?: number
@@ -16,13 +18,35 @@ withDefaults(
   },
 )
 
-defineEmits<{
+const emit = defineEmits<{
   reset: []
   prev: []
   next: []
   togglePlay: []
   changeSpeed: [speed: number]
 }>()
+
+/** 速度一律顯示一位小數，例如 1.0× */
+function formatSpeed(speed: number) {
+  return `${speed.toFixed(1)}×`
+}
+
+/** 速度下拉選單 */
+const speedMenuOpen = ref(false)
+const speedRef = ref<HTMLElement>()
+
+function selectSpeed(speed: number) {
+  emit('changeSpeed', speed)
+  speedMenuOpen.value = false
+}
+
+/** 點選單外面時關閉 */
+function onDocumentPointerDown(event: PointerEvent) {
+  if (!speedRef.value?.contains(event.target as Node)) speedMenuOpen.value = false
+}
+
+onMounted(() => document.addEventListener('pointerdown', onDocumentPointerDown))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPointerDown))
 </script>
 
 <template>
@@ -69,6 +93,7 @@ defineEmits<{
       {{ String(currentStep).padStart(2, '0') }} / {{ String(totalSteps).padStart(2, '0') }}
     </span>
 
+    <!-- 桌機、平板：速度按鈕列 -->
     <div class="tool-footer__speed">
       <span class="tool-footer__speed-label">速度</span>
       <button
@@ -81,6 +106,35 @@ defineEmits<{
       >
         {{ speed }}×
       </button>
+    </div>
+
+    <!-- 手機：速度下拉選單 -->
+    <div ref="speedRef" class="tool-footer__speed-dropdown">
+      <button
+        type="button"
+        class="tool-footer__speed-trigger"
+        aria-haspopup="listbox"
+        :aria-expanded="speedMenuOpen"
+        :aria-label="`播放速度 ${formatSpeed(activeSpeed)}`"
+        @click="speedMenuOpen = !speedMenuOpen"
+      >
+        {{ formatSpeed(activeSpeed) }}
+      </button>
+
+      <ul v-if="speedMenuOpen" class="tool-footer__speed-menu" role="listbox">
+        <li v-for="speed in speedOptions" :key="speed">
+          <button
+            type="button"
+            role="option"
+            class="tool-footer__speed-option"
+            :class="{ 'tool-footer__speed-option--active': speed === activeSpeed }"
+            :aria-selected="speed === activeSpeed"
+            @click="selectSpeed(speed)"
+          >
+            {{ formatSpeed(speed) }}
+          </button>
+        </li>
+      </ul>
     </div>
   </footer>
 </template>

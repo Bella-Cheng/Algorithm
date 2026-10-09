@@ -134,4 +134,111 @@
       color: $canvas;
     }
   }
+
+  // 手機版才顯示，樣式寫在下方 media 裡
+  &__speed-dropdown {
+    display: none;
+  }
+}
+
+// 手機：疊在圖表底部的精簡控制列，進度條在上、按鈕在下
+@media (max-width: $breakpoint-mobile) {
+  .tool-footer {
+    height: $player-overlay-height;
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 10px 12px;
+    padding: 8px 16px 10px;
+    border-top: none;
+    background: linear-gradient(to bottom, rgba($canvas, 0), rgba($canvas, 0.92) 35%);
+
+    &__progress {
+      order: -1;
+      flex-basis: 100%;
+    }
+
+    &__progress-label,
+    &__speed {
+      display: none;
+    }
+
+    &__controls {
+      gap: 8px;
+    }
+
+    &__icon-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    &__play-btn {
+      height: 36px;
+      padding-inline: 16px;
+      font-size: 13px;
+    }
+
+    &__step-count {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    // 速度下拉選單
+    &__speed-dropdown {
+      position: relative;
+      display: block;
+    }
+
+    &__speed-trigger {
+      display: inline-flex;
+      height: 32px;
+      min-width: 48px;
+      align-items: center;
+      justify-content: center;
+      padding-inline: 12px;
+      border: $border-width solid $border;
+      border-radius: $radius-pill;
+      background: $surface;
+      color: $text-primary;
+      cursor: pointer;
+      font-family: $font-mono;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    // 控制列在畫面底部，選單往上展開
+    &__speed-menu {
+      position: absolute;
+      z-index: 10;
+      right: 0;
+      bottom: calc(100% + 8px);
+      min-width: 88px;
+      margin: 0;
+      padding: 4px;
+      border: $border-width solid $border;
+      border-radius: 12px;
+      background: $canvas;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      list-style: none;
+    }
+
+    &__speed-option {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: $text-muted;
+      cursor: pointer;
+      font-family: $font-mono;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+
+      &--active {
+        background: $color-primary;
+        color: $canvas;
+      }
+    }
+  }
 }

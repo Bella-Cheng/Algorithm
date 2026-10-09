@@ -157,3 +157,30 @@
     }
   }
 }
+
+// 手機：放在「步驟」分頁，目前步驟排最前面
+@media (max-width: $breakpoint-mobile) {
+  .input-panel {
+    gap: 20px;
+    padding: 16px;
+
+    &__section:last-child {
+      order: -1;
+    }
+
+    &__step {
+      min-height: 0;
+      gap: 8px;
+      padding: 14px 16px;
+    }
+
+    &__step-text {
+      font-size: 14px;
+    }
+
+    // 手機改用 ToolLayout 下方的「產生新資料」按鈕
+    &__generate {
+      display: none;
+    }
+  }
+}
