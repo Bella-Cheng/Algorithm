@@ -1,0 +1,111 @@
+.bar-canvas {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: flex-end; // 柱子從底部往上長
+  gap: var(--bar-gap, 36px);
+  padding-bottom: 56px; // 底部預留數字與 index 的空間
+
+  &--no-index {
+    padding-bottom: 32px;
+  }
+
+  &--compact {
+    padding-bottom: 0;
+  }
+
+  &__bar {
+    position: relative;
+    flex: 1;
+    border-radius: var(--bar-radius, #{$radius-sm});
+    background-color: $border;
+    transition:
+      height 0.3s ease,
+      background-color 0.2s ease;
+
+    // 已排好順序 / 已固定在最終位置
+    &--sorted {
+      background-color: $accent-cyan;
+    }
+
+    // 比 pivot 小
+    &--less {
+      background-color: $accent-cyan;
+
+      .bar-canvas__label {
+        color: $accent-cyan;
+      }
+    }
+
+    // 比 pivot 大
+    &--greater {
+      background-color: $text-muted;
+
+      .bar-canvas__label {
+        color: $text-muted;
+      }
+    }
+
+    // 正在選中（往右冒泡的較大值）
+    &--active {
+      background-color: $accent-lime;
+
+      .bar-canvas__label {
+        color: $accent-lime;
+      }
+    }
+
+    // 被選中比較
+    &--comparing {
+      background-color: $accent-pink;
+
+      .bar-canvas__label {
+        color: $accent-pink;
+      }
+    }
+  }
+
+  &__label {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: $font-mono;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  &__index {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .bar-canvas {
+    padding-bottom: 44px;
+
+    &--no-index {
+      padding-bottom: 26px;
+    }
+
+    &--compact {
+      padding-bottom: 0;
+    }
+
+    &__label {
+      bottom: -24px;
+      font-size: 11px;
+    }
+
+    &__index {
+      bottom: -40px;
+    }
+  }
+}

@@ -35,86 +35,7 @@
     flex: 1;
     min-height: 0; // 允許跟著畫面縮小，下方說明才不會被擠出去
     align-items: stretch; // 撐滿高度，子層的 % 高度才算得出來
-    padding: 24px 28px 56px; // 底部預留數字與 index 的空間
-  }
-
-  &__bars {
-    display: flex;
-    width: 100%;
-    align-items: flex-end; // 柱子從底部往上長
-    gap: 36px;
-  }
-
-  &__bar {
-    position: relative;
-    flex: 1;
-    border-radius: $radius-sm;
-    background-color: $border;
-    transition:
-      height 0.3s ease,
-      background-color 0.2s ease;
-
-    &__label {
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: $font-mono;
-      font-size: 13px;
-      font-weight: 500;
-      transition: color 0.2s ease;
-    }
-
-    &__index {
-      position: absolute;
-      bottom: -50px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: $text-muted;
-      font-family: $font-mono;
-      font-size: 10px;
-    }
-
-    // 已排好順序 / 已固定在最終位置
-    &--sorted {
-      background-color: $accent-cyan;
-    }
-
-    // 比 pivot 小
-    &--less {
-      background-color: $accent-cyan;
-
-      .bar-chart__bar__label {
-        color: $accent-cyan;
-      }
-    }
-
-    // 比 pivot 大
-    &--greater {
-      background-color: $text-muted;
-
-      .bar-chart__bar__label {
-        color: $text-muted;
-      }
-    }
-
-    // 正在選中（往右冒泡的較大值）
-    &--active {
-      background-color: $accent-lime;
-
-      .bar-chart__bar__label {
-        color: $accent-lime;
-      }
-    }
-
-    // 被選中比較
-    &--comparing {
-      background-color: $accent-pink;
-
-      .bar-chart__bar__label {
-        color: $accent-pink;
-      }
-    }
+    padding: 24px 28px 0; // 底部數字與 index 的空間由 BarCanvas 預留
   }
 
   &__footer {
@@ -168,20 +89,11 @@
     }
 
     &__content {
-      padding: 12px 4px 44px;
+      padding: 12px 4px 0;
     }
 
     &__bars {
-      gap: 8px;
-    }
-
-    &__bar__label {
-      bottom: -24px;
-      font-size: 11px;
-    }
-
-    &__bar__index {
-      bottom: -40px;
+      --bar-gap: 8px;
     }
 
     // 詳細說明在手機版隱藏，避免被播放器蓋住
