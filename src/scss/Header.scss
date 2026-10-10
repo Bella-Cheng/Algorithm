@@ -19,17 +19,9 @@
   }
 
   &__logo {
-    display: inline-flex;
+    display: block;
     width: 32px;
     height: 32px;
-    align-items: center;
-    justify-content: center;
-    border-radius: $radius-sm;
-    color: $canvas;
-    background: $accent-lime;
-    font-family: $font-mono;
-    font-size: 14px;
-    font-weight: 600;
   }
 
   &__title {
@@ -110,7 +102,6 @@
     &__logo {
       width: 28px;
       height: 28px;
-      font-size: 12px;
     }
 
     &__title {

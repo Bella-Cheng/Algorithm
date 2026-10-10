@@ -18,7 +18,7 @@ withDefaults(
 <template>
   <header class="app-header">
     <RouterLink to="/" class="app-header__brand">
-      <span class="app-header__logo">//</span>
+      <img class="app-header__logo" src="/favicon.svg" alt="" />
       <span class="app-header__title">ALGO ATELIER</span>
     </RouterLink>
 

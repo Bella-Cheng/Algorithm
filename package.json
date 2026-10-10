@@ -1,6 +1,7 @@
 {
   "name": "algorithm",
   "version": "1.0.0",
+  "author": "Bella-Cheng",
   "private": true,
   "type": "module",
   "scripts": {
