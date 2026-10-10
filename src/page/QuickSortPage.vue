@@ -6,28 +6,22 @@ import BarChart from '@/component/BarChart.vue'
 import InputPanel from '@/component/InputPanel.vue'
 import CodePanel from '@/component/CodePanel.vue'
 import DataModal from '@/component/DataModal.vue'
-import SelectField from '@/component/SelectField.vue'
 import SortDataFields from '@/component/SortDataFields.vue'
 import { computed, ref } from 'vue'
 import {
   DEFAULT_SORT_SETTINGS,
   SORT_DATA_HINT,
+  createUniqueArray,
   type SortDataSettings,
 } from '@/algorithms/sortData'
-import type { SelectOption } from '@/types/select'
 import {
   QUICK_SORT_CODE,
   QUICK_SORT_PHASE_LABEL,
   createQuickSortSteps,
 } from '@/algorithms/quickSort'
 import { useStepPlayer } from '@/composables/useStepPlayer'
-import type { LegendItem, PivotStrategy } from '@/types/sort'
+import type { LegendItem } from '@/types/sort'
 import { padNumber } from '@/utils/format'
-
-/** 隨機陣列的數量與範圍 */
-const ARRAY_LENGTH = 8
-const MIN_VALUE = 1
-const MAX_VALUE = 100
 
 /** 圖例，顏色與 BarChart 的長條狀態一致 */
 const LEGENDS: LegendItem[] = [
@@ -38,12 +32,11 @@ const LEGENDS: LegendItem[] = [
   { state: 'default', label: '尚未處理' },
 ]
 
-const randomArray = (length: number, min: number, max: number) => {
-  return Array.from({ length }, () => Math.floor(Math.random() * (max - min + 1)) + min)
-}
+/** 目前套用中的資料設定 */
+const settings = ref<SortDataSettings>({ ...DEFAULT_SORT_SETTINGS })
 
 /** 原始輸入陣列（頁面載入時先產生一次） */
-const arr = ref<number[]>(randomArray(ARRAY_LENGTH, MIN_VALUE, MAX_VALUE))
+const arr = ref<number[]>(createUniqueArray(settings.value))
 
 /** 依輸入陣列預先算出所有步驟，並記錄排序耗時 */
 const sortResult = computed(() => {
@@ -66,27 +59,20 @@ const stepLabel = computed(
   () => `${QUICK_SORT_PHASE_LABEL[step.value.phase]}  /  ${padNumber(step.value.pass)}`,
 )
 
-/** 選擇基準值的選項 */
-const PIVOT_OPTIONS: SelectOption<PivotStrategy>[] = [
-  { label: '最右邊', value: 'right' },
-  { label: '最左邊', value: 'left' },
-  { label: '中間', value: 'middle' },
-  { label: '隨機', value: 'random' },
-]
-
 const isModalOpen = ref(false)
-/** 彈窗裡正在編輯的設定 TODO: 之後接上 regenerate 與 createQuickSortSteps */
-const draft = ref<SortDataSettings>({ ...DEFAULT_SORT_SETTINGS })
-const pivotDraft = ref<PivotStrategy>('right')
+/** 彈窗裡正在編輯的設定，按下「產生並套用」才會寫回 settings */
+const draft = ref<SortDataSettings>({ ...settings.value })
 
 function openModal() {
+  draft.value = { ...settings.value }
   isModalOpen.value = true
 }
 
-/** 重新產生陣列，並把步驟歸 0 */
+/** 套用彈窗設定、重新產生陣列，並把步驟歸 0 */
 function regenerate() {
   reset()
-  arr.value = randomArray(ARRAY_LENGTH, MIN_VALUE, MAX_VALUE)
+  settings.value = { ...draft.value }
+  arr.value = createUniqueArray(settings.value)
 }
 </script>
 
@@ -153,16 +139,11 @@ function regenerate() {
 
     <DataModal
       v-model:open="isModalOpen"
-      description="設定資料範圍與基準值後套用至快速排序。"
-      extra-title="PIVOT"
+      description="設定資料範圍後套用至快速排序。"
       :hint="SORT_DATA_HINT"
       @confirm="regenerate"
     >
       <SortDataFields v-model="draft" />
-
-      <template #extra>
-        <SelectField v-model="pivotDraft" label="選擇基準值" :options="PIVOT_OPTIONS" />
-      </template>
     </DataModal>
   </div>
 </template>

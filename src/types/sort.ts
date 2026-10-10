@@ -10,9 +10,6 @@ import type { GraphLegendState } from '@/types/graph'
  */
 export type BarState = 'default' | 'active' | 'comparing' | 'less' | 'greater' | 'sorted'
 
-/** 快速排序選擇基準值的位置 */
-export type PivotStrategy = 'right' | 'left' | 'middle' | 'random'
-
 /** 左側面板的顏色圖例（排序頁用 BarState，圖論頁用 GraphLegendState） */
 export interface LegendItem {
   state: BarState | GraphLegendState
