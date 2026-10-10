@@ -53,9 +53,10 @@
       text-decoration: none;
     }
 
-    &--disabled {
-      cursor: default;
-      pointer-events: none;
+    &--active,
+    &--active:hover {
+      color: $accent-lime;
+      font-weight: 700;
     }
   }
 
@@ -72,6 +73,13 @@
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+
+    &--filled {
+      height: 40px;
+      padding-inline: 20px;
+      color: $canvas;
+      background: $color-primary;
+    }
   }
 
   &__btn {

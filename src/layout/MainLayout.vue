@@ -8,7 +8,11 @@ const route = useRoute()
 <template>
   <div class="main-layout">
     <!-- 首頁右側只放「開始探索」，工具頁才顯示導覽 -->
-    <Header :show-nav="route.name !== 'Home'" :header-btn-text="route.meta.headerBtnText" />
+    <Header
+      :show-nav="route.name !== 'Home'"
+      :header-btn-text="route.meta.headerBtnText"
+      :badge-filled="route.meta.headerBadgeFilled"
+    />
     <main class="main-layout__content">
       <RouterView />
     </main>
