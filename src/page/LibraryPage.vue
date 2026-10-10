@@ -1,83 +1,22 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import AlgorithmCard, { type AlgorithmCardAccent } from '@/component/AlgorithmCard.vue'
+import { ToggleGroupItem, ToggleGroupRoot } from 'reka-ui'
+import AlgorithmCard from '@/component/AlgorithmCard.vue'
 import BarCanvas from '@/component/BarCanvas.vue'
 import GraphCanvas from '@/component/GraphCanvas.vue'
 import SiteFooter from '@/component/SiteFooter.vue'
-import {
-  DEFAULT_END,
-  DEFAULT_START,
-  DIJKSTRA_DATA,
-  NODE_POSITIONS,
-  createDijkstraSteps,
-  toEdges,
-} from '@/algorithms/dijkstra'
-import type { Graph } from '@/types/graph'
-import type { BarState } from '@/types/sort'
+import { MODULES } from '@/data/library'
+import type { ModuleFilter } from '@/types/library'
+import type { SelectOption } from '@/types/select'
+import { padNumber } from '@/utils/format'
+import { PREVIEW_BARS, createDijkstraPreview, createPreviewStates } from '@/utils/preview'
 
 // ---------------------------------------------------------------------------
-// 模組資料
+// 頁面用的固定資料
 // ---------------------------------------------------------------------------
-
-type Category = 'sorting' | 'graph'
-type Level = 'basic' | 'advanced'
-
-interface LibraryModule {
-  index: string
-  title: string
-  description: string
-  complexity: string
-  to: string
-  accent: AlgorithmCardAccent
-  category: Category
-  level: Level
-  /** 搜尋用的額外關鍵字（英文名、別名等） */
-  keywords: string[]
-  /** 排序卡片預覽長條的強調狀態；圖論卡片不用 */
-  previewState?: BarState
-}
-
-const MODULES: LibraryModule[] = [
-  {
-    index: '01',
-    title: '氣泡排序',
-    description: '兩兩比較，讓最大值逐步浮出。',
-    complexity: 'O(n²)',
-    to: '/BubbleSort',
-    accent: 'lime',
-    category: 'sorting',
-    level: 'basic',
-    keywords: ['bubble sort', '交換', 'swap'],
-    previewState: 'active',
-  },
-  {
-    index: '02',
-    title: '快速排序',
-    description: '選定基準，將問題俐落地分割。',
-    complexity: 'O(n log n)',
-    to: '/QuickSort',
-    accent: 'cyan',
-    category: 'sorting',
-    level: 'advanced',
-    keywords: ['quick sort', 'pivot', '基準', '分治', 'divide and conquer'],
-    previewState: 'sorted',
-  },
-  {
-    index: '03',
-    title: 'Dijkstra 最短路徑',
-    description: '從起點擴張，找出最小成本路徑。',
-    complexity: 'O(E log V)',
-    to: '/Dijkstra',
-    accent: 'amber',
-    category: 'graph',
-    level: 'advanced',
-    keywords: ['shortest path', '最短路徑', '圖', 'graph', 'greedy', '貪婪'],
-  },
-]
 
 /** 篩選按鈕：類別與難度放在同一排，一次只選一個 */
-type Filter = 'all' | Category | Level
-const FILTERS: { value: Filter; label: string }[] = [
+const FILTERS: SelectOption<ModuleFilter>[] = [
   { value: 'all', label: '全部' },
   { value: 'sorting', label: '排序' },
   { value: 'graph', label: '圖論' },
@@ -91,17 +30,16 @@ const LEARNING_PATH = [
   { index: '03', label: '探索路徑', to: '/Dijkstra', accent: 'amber' },
 ] as const
 
-const pad = (n: number) => String(n).padStart(2, '0')
-
-const total = pad(MODULES.length)
-const categoryCount = pad(new Set(MODULES.map((m) => m.category)).size)
+const total = padNumber(MODULES.length)
+const categoryCount = padNumber(new Set(MODULES.map((m) => m.category)).size)
+const dijkstraPreview = createDijkstraPreview()
 
 // ---------------------------------------------------------------------------
 // 搜尋與篩選
 // ---------------------------------------------------------------------------
 
 const query = ref('')
-const activeFilter = ref<Filter>('all')
+const activeFilter = ref<ModuleFilter>('all')
 
 const filteredModules = computed(() => {
   const keyword = query.value.trim().toLowerCase()
@@ -117,6 +55,11 @@ const filteredModules = computed(() => {
     )
   })
 })
+
+/** 再點一次已選的按鈕時，ToggleGroup 會送出空值；忽略它，讓篩選永遠有一個被選中 */
+function onFilterChange(value: unknown) {
+  if (value) activeFilter.value = value as ModuleFilter
+}
 
 function resetFilters() {
   query.value = ''
@@ -136,17 +79,6 @@ function onKeydown(event: KeyboardEvent) {
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
-
-// ---------------------------------------------------------------------------
-// 卡片預覽：與首頁相同
-// ---------------------------------------------------------------------------
-
-const PREVIEW_BARS = [14, 20, 26, 32, 38, 44, 50, 56]
-const previewStates = (state: BarState) =>
-  PREVIEW_BARS.map<BarState>((_, i) => (i === 5 ? state : 'default'))
-
-const graph: Graph = { nodes: NODE_POSITIONS, edges: toEdges(DIJKSTRA_DATA) }
-const dijkstraResult = createDijkstraSteps(DIJKSTRA_DATA, DEFAULT_START, DEFAULT_END).at(-1)!
 </script>
 
 <template>
@@ -193,23 +125,27 @@ const dijkstraResult = createDijkstraSteps(DIJKSTRA_DATA, DEFAULT_START, DEFAULT
           />
         </label>
         <span class="library__result-count">
-          顯示 {{ pad(filteredModules.length) }} / {{ total }}
+          顯示 {{ padNumber(filteredModules.length) }} / {{ total }}
         </span>
       </div>
 
-      <div class="library__filters" role="group" aria-label="篩選演算法">
-        <button
+      <!-- 選中狀態與 aria-pressed 由 Reka 處理，可用 ← → 切換 -->
+      <ToggleGroupRoot
+        type="single"
+        :model-value="activeFilter"
+        class="library__filters"
+        aria-label="篩選演算法"
+        @update:model-value="onFilterChange"
+      >
+        <ToggleGroupItem
           v-for="filter in FILTERS"
           :key="filter.value"
-          type="button"
+          :value="filter.value"
           class="library__filter"
-          :class="{ 'library__filter--active': activeFilter === filter.value }"
-          :aria-pressed="activeFilter === filter.value"
-          @click="activeFilter = filter.value"
         >
           {{ filter.label }}
-        </button>
-      </div>
+        </ToggleGroupItem>
+      </ToggleGroupRoot>
     </section>
 
     <section class="library__modules">
@@ -235,15 +171,15 @@ const dijkstraResult = createDijkstraSteps(DIJKSTRA_DATA, DEFAULT_START, DEFAULT
                 v-if="m.previewState"
                 class="library__mini-bars"
                 :arr="PREVIEW_BARS"
-                :bar-states="previewStates(m.previewState)"
+                :bar-states="createPreviewStates(m.previewState)"
                 compact
               />
               <GraphCanvas
                 v-else
                 class="library__graph"
-                :graph="graph"
-                :node-states="dijkstraResult.nodeStates"
-                :edge-states="dijkstraResult.edgeStates"
+                :graph="dijkstraPreview.graph"
+                :node-states="dijkstraPreview.nodeStates"
+                :edge-states="dijkstraPreview.edgeStates"
                 compact
               />
             </template>

@@ -21,7 +21,8 @@ import {
   createQuickSortSteps,
 } from '@/algorithms/quickSort'
 import { useStepPlayer } from '@/composables/useStepPlayer'
-import type { LegendItem } from '@/types/sort'
+import type { LegendItem, PivotStrategy } from '@/types/sort'
+import { padNumber } from '@/utils/format'
 
 /** 隨機陣列的數量與範圍 */
 const ARRAY_LENGTH = 8
@@ -62,10 +63,8 @@ const { currentStep, isPlaying, speed, togglePlay, next, prev, reset, setSpeed }
 const step = computed(() => steps.value[currentStep.value] ?? steps.value[0]!)
 
 const stepLabel = computed(
-  () => `${QUICK_SORT_PHASE_LABEL[step.value.phase]}  /  ${String(step.value.pass).padStart(2, '0')}`,
+  () => `${QUICK_SORT_PHASE_LABEL[step.value.phase]}  /  ${padNumber(step.value.pass)}`,
 )
-
-type PivotStrategy = 'right' | 'left' | 'middle' | 'random'
 
 /** 選擇基準值的選項 */
 const PIVOT_OPTIONS: SelectOption<PivotStrategy>[] = [

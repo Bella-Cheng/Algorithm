@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import SelectMenu from '@/component/SelectMenu.vue'
+import { padNumber } from '@/utils/format'
 
 const props = withDefaults(
   defineProps<{
@@ -84,7 +85,7 @@ const speedModel = computed({
     </div>
 
     <span class="tool-footer__step-count">
-      {{ String(currentStep).padStart(2, '0') }} / {{ String(totalSteps).padStart(2, '0') }}
+      {{ padNumber(currentStep) }} / {{ padNumber(totalSteps) }}
     </span>
 
     <!-- 桌機、平板：速度按鈕列 -->

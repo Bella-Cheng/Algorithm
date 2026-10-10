@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
-
-/** 卡片的強調色：編號與 hover 外框 */
-export type AlgorithmCardAccent = 'lime' | 'cyan' | 'amber'
+import type { ModuleAccent } from '@/types/library'
 
 withDefaults(
   defineProps<{
@@ -12,7 +10,8 @@ withDefaults(
     /** 時間複雜度，如 O(n²) */
     complexity: string
     to: RouteLocationRaw
-    accent?: AlgorithmCardAccent
+    /** 強調色：編號與 hover 外框 */
+    accent?: ModuleAccent
   }>(),
   {
     accent: 'lime',

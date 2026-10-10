@@ -21,6 +21,7 @@ import {
 } from '@/algorithms/sortData'
 import { useStepPlayer } from '@/composables/useStepPlayer'
 import type { LegendItem } from '@/types/sort'
+import { padNumber } from '@/utils/format'
 
 /** 圖例，顏色與 BarChart 的長條狀態一致 */
 const LEGENDS: LegendItem[] = [
@@ -54,7 +55,7 @@ const { currentStep, isPlaying, speed, togglePlay, next, prev, reset, setSpeed }
 const step = computed(() => steps.value[currentStep.value] ?? steps.value[0]!)
 
 const stepLabel = computed(
-  () => `${BUBBLE_SORT_PHASE_LABEL[step.value.phase]}  /  ${String(step.value.pass).padStart(2, '0')}`,
+  () => `${BUBBLE_SORT_PHASE_LABEL[step.value.phase]}  /  ${padNumber(step.value.pass)}`,
 )
 
 const isModalOpen = ref(false)

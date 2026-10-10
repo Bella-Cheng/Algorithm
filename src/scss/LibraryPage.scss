@@ -182,8 +182,9 @@
       background: $accent-lime-dim;
     }
 
-    &--active,
-    &--active:hover {
+    // Reka 會在選中的按鈕加上 data-state="on"
+    &[data-state='on'],
+    &[data-state='on']:hover {
       color: $canvas;
       background: $accent-lime;
       font-weight: 700;
@@ -217,11 +218,13 @@
     margin-top: 32px;
   }
 
+  // 排序卡片的小長條
   &__mini-bars {
     --bar-gap: 8px;
     --bar-radius: 4px;
   }
 
+  // Dijkstra 卡片的小圖，撐滿預覽區高度並置中
   &__graph {
     width: auto;
     height: 100%;

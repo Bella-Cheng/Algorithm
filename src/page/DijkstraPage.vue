@@ -20,6 +20,7 @@ import {
 import { useStepPlayer } from '@/composables/useStepPlayer'
 import type { Graph } from '@/types/graph'
 import type { LegendItem } from '@/types/sort'
+import { padNumber } from '@/utils/format'
 
 /** 圖例，顏色與 GraphChart 的節點狀態一致 */
 const LEGENDS: LegendItem[] = [
@@ -60,7 +61,7 @@ const step = computed(() => steps.value[currentStep.value] ?? steps.value[0]!)
 
 const stepLabel = computed(
   () =>
-    `${DIJKSTRA_PHASE_LABEL[step.value.phase]}  ${step.value.focus}  /  ${String(step.value.visitedCount).padStart(2, '0')}`,
+    `${DIJKSTRA_PHASE_LABEL[step.value.phase]}  ${step.value.focus}  /  ${padNumber(step.value.visitedCount)}`,
 )
 
 /** 重新產生邊的權重，並把步驟歸 0 */

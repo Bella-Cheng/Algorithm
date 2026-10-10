@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { padNumber } from '@/utils/format'
 
 const props = withDefaults(
   defineProps<{
@@ -87,7 +88,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
         class="code-panel__line"
         :class="{ 'code-panel__line--active': highlightLines.includes(index + 1) }"
       >
-        <span class="code-panel__line-no">{{ String(index + 1).padStart(2, '0') }}</span>
+        <span class="code-panel__line-no">{{ padNumber(index + 1) }}</span>
         <code class="code-panel__code">{{ line }}</code>
       </li>
     </ol>

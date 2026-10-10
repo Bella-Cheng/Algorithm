@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import GraphCanvas from '@/component/GraphCanvas.vue'
 import type { EdgeState, Graph, NodeState } from '@/types/graph'
+import { padNumber } from '@/utils/format'
 
 withDefaults(
   defineProps<{
@@ -27,10 +28,6 @@ withDefaults(
     message: '',
   },
 )
-
-function pad(value: number) {
-  return String(value).padStart(2, '0')
-}
 </script>
 
 <template>
@@ -38,7 +35,7 @@ function pad(value: number) {
     <div class="graph-chart__header">
       <span class="graph-chart__title">VISUALIZATION / {{ title }}</span>
       <span class="graph-chart__visited">
-        VISITED {{ pad(visitedCount) }} / {{ pad(graph.nodes.length) }}
+        VISITED {{ padNumber(visitedCount) }} / {{ padNumber(graph.nodes.length) }}
       </span>
     </div>
 
@@ -52,7 +49,7 @@ function pad(value: number) {
     </div>
 
     <div class="graph-chart__footer">
-      <span class="graph-chart__footer__step">{{ pad(currentStep) }}</span>
+      <span class="graph-chart__footer__step">{{ padNumber(currentStep) }}</span>
       <p class="graph-chart__footer__info">{{ message }}</p>
     </div>
   </div>

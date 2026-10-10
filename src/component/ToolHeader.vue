@@ -1,5 +1,5 @@
 <script setup lang="ts">
-type StatusVariant = 'primary' | 'comparing' | 'warning'
+import type { StatusVariant } from '@/types/tool'
 
 withDefaults(
   defineProps<{

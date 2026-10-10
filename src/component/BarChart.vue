@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BarCanvas from '@/component/BarCanvas.vue'
 import type { BarState } from '@/types/sort'
+import { padNumber } from '@/utils/format'
 
 withDefaults(
   defineProps<{
@@ -24,17 +25,13 @@ withDefaults(
     message: '',
   },
 )
-
-function padStep(step: number) {
-  return String(step).padStart(2, '0')
-}
 </script>
 
 <template>
   <div class="bar-chart">
     <div class="bar-chart__header">
       <span class="bar-chart__title">VISUALIZATION / {{ title }}</span>
-      <span class="bar-chart__step">STEP {{ padStep(currentStep) }} / {{ padStep(totalSteps) }}</span>
+      <span class="bar-chart__step">STEP {{ padNumber(currentStep) }} / {{ padNumber(totalSteps) }}</span>
     </div>
 
     <div class="bar-chart__content">
@@ -42,7 +39,7 @@ function padStep(step: number) {
     </div>
 
     <div class="bar-chart__footer">
-      <span class="bar-chart__footer__step">{{ padStep(currentStep) }}</span>
+      <span class="bar-chart__footer__step">{{ padNumber(currentStep) }}</span>
       <p class="bar-chart__footer__info">{{ message }}</p>
     </div>
   </div>
