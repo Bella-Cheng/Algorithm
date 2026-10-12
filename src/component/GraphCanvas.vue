@@ -22,10 +22,25 @@ const props = withDefaults(
   },
 )
 
-/** 節點半徑，viewBox 固定 820 × 520 */
-const NODE_RADIUS = 34
+/** 節點半徑（手機版在 scss 用 CSS 的 r 放大） */
+const NODE_RADIUS = 40
+/** viewBox 四邊預留的空間：要容得下手機版放大後的節點（r 48）加上外框線寬 */
+const VIEW_MARGIN = 56
 /** 權重標籤離邊的距離 */
-const LABEL_OFFSET = 14
+const LABEL_OFFSET = 22
+
+/** viewBox 貼齊所有節點的範圍，上下左右留白一致，圖也能放到最大 */
+const viewBox = computed(() => {
+  if (props.graph.nodes.length === 0) return '0 0 820 520'
+
+  const xs = props.graph.nodes.map((node) => node.x)
+  const ys = props.graph.nodes.map((node) => node.y)
+  const minX = Math.min(...xs) - VIEW_MARGIN
+  const minY = Math.min(...ys) - VIEW_MARGIN
+  const width = Math.max(...xs) + VIEW_MARGIN - minX
+  const height = Math.max(...ys) + VIEW_MARGIN - minY
+  return `${minX} ${minY} ${width} ${height}`
+})
 
 /** 預先算好每條邊的端點與權重標籤位置 */
 const edges = computed(() => {
@@ -71,7 +86,7 @@ const sortedEdges = computed(() => {
   <svg
     class="graph-canvas"
     :class="{ 'graph-canvas--compact': compact }"
-    viewBox="0 0 820 520"
+    :viewBox="viewBox"
     role="img"
     aria-label="加權圖"
   >

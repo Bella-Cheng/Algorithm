@@ -35,7 +35,13 @@
   &__weight {
     fill: $text-muted;
     font-family: $font-mono;
-    font-size: 16px;
+    font-size: 22px;
+    font-weight: 700;
+    // 與背景同色的描邊，數字壓到線時仍看得清楚
+    paint-order: stroke;
+    stroke: $surface;
+    stroke-width: 6px;
+    stroke-linejoin: round;
     text-anchor: middle;
     dominant-baseline: middle;
     transition: fill 0.25s ease;
@@ -95,7 +101,7 @@
   &__node-label {
     fill: $text-primary;
     font-family: $font-mono;
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 700;
     text-anchor: middle;
     dominant-baseline: central;
@@ -114,6 +120,45 @@
 
     .graph-canvas__node circle {
       stroke-width: 8;
+    }
+  }
+}
+
+// 手機：viewBox 被縮到約 0.4 倍，節點、字級與線寬放大
+// 節點半徑上限 48，viewBox 的預留空間（GraphCanvas.vue 的 VIEW_MARGIN）是照這個值算的
+@media (max-width: $breakpoint-mobile) {
+  .graph-canvas:not(.graph-canvas--compact) {
+    .graph-canvas__edge {
+      line {
+        stroke-width: 4;
+      }
+
+      &--path line {
+        stroke-width: 9;
+      }
+
+      &--checking line {
+        stroke-width: 6;
+      }
+    }
+
+    .graph-canvas__weight {
+      font-size: 28px;
+    }
+
+    .graph-canvas__node {
+      circle {
+        r: 48px;
+        stroke-width: 4;
+      }
+
+      &--checking circle {
+        stroke-width: 8;
+      }
+    }
+
+    .graph-canvas__node-label {
+      font-size: 32px;
     }
   }
 }

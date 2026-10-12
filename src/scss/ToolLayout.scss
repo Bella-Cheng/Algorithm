@@ -62,7 +62,7 @@
       'main'
       'tabs'
       'panel';
-    grid-template-rows: minmax(0, 1.15fr) auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.6fr) auto minmax(0, 1fr);
 
     &__body {
       display: contents;

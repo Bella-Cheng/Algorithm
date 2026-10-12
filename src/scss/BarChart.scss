@@ -70,22 +70,9 @@
     gap: 8px;
     padding: 14px 16px $player-overlay-height; // 底部留給疊上來的播放器
 
+    // 標題列在手機版隱藏，把空間留給圖
     &__header {
-      gap: 8px;
-    }
-
-    &__title {
-      overflow: hidden;
-      min-width: 0;
-      font-size: 11px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    &__step {
-      flex-shrink: 0;
-      padding: 6px 12px;
-      font-size: 11px;
+      display: none;
     }
 
     &__content {
