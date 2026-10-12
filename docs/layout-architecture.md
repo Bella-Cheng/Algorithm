@@ -107,6 +107,7 @@ Props：
 - 結構：`左側欄位（slot #left）` + `主內容（預設 slot）` + `右側欄位（slot #right）`，下方接 `ToolFooter`
 - 左右欄位**目前只搭版面，不放內容**（寬度分別 280px / 360px，用邊框跟主內容區隔），對應截圖左側 INPUT DATA 面板與右側程式碼面板的位置，實際內容留給之後的頁面開發
 - 不透過巢狀路由實作，而是頁面元件（如 `BubbleSortPage.vue`）直接引用 `ToolLayout` 並用 slot 組合內容
+- 手機版改成上下結構（圖表 → 切換按鈕 → 下方面板），見 [mobile-layout.md](./mobile-layout.md)
 
 使用範例：
 

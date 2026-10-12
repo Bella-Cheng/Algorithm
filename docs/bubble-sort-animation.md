@@ -189,4 +189,3 @@ function regenerate() {
 ## 後續待辦（Not in scope）
 
 - 手動輸入陣列（目前只能隨機產生）
-- 手機版版面（三欄在窄螢幕尚未調整）

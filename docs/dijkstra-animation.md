@@ -11,8 +11,10 @@
 ```
 src/types/graph.ts                 // 新增：Graph / GraphStep 型別、NodeState / EdgeState、edgeKey()
 src/algorithms/dijkstra.ts         // 新增：dijkstra() 本體 + 步驟產生器 + 程式碼常數 + 預設圖
-src/component/GraphChart.vue       // 新增：SVG 加權圖視覺化（取代 BarChart 的位置）
-src/scss/GraphChart.scss           // 新增：節點、邊、權重樣式
+src/component/GraphChart.vue       // 新增：視覺化外框（標題列、說明框），中間放 GraphCanvas（取代 BarChart 的位置）
+src/scss/GraphChart.scss           // 新增：外框樣式
+src/component/GraphCanvas.vue      // 新增：SVG 加權圖本體（節點、邊、權重），首頁 / 演算法庫的卡片預覽也共用
+src/scss/GraphCanvas.scss          // 新增：節點、邊、權重樣式
 src/page/DijkstraPage.vue          // 新增：頁面組合
 src/router/index.ts                // 新增 /Dijkstra 路由
 src/types/sort.ts                  // LegendItem.state 放寬為 BarState | GraphLegendState
@@ -44,7 +46,7 @@ export const DIJKSTRA_DATA: DijkstraGraph = {
 DIJKSTRA_DATA（鄰接表，每條邊寫兩次）
   ├─ dijkstra(data, ...)                      → 演算法直接用
   ├─ toEdges(data)  → 12 條不重複的邊
-  │    ├─ GraphChart 畫線、權重數字
+  │    ├─ GraphCanvas 畫線、權重數字
   │    ├─ snapshot 決定每條邊的顏色
   │    └─ 左側「12 edges」
   └─ for (const id in data)                   → snapshot 決定每個節點的顏色
@@ -54,7 +56,7 @@ DIJKSTRA_DATA（鄰接表，每條邊寫兩次）
 
 ⚠️ 改 `DIJKSTRA_DATA` 時，**兩個方向的權重要一樣**。`toEdges` 只取先出現的那筆，兩邊不一致時畫面顯示的權重可能跟演算法實際走的方向對不起來。
 
-鄰接表裡沒有座標，所以節點位置另外存在 `NODE_POSITIONS`（座標系是 GraphChart 的 SVG `viewBox="0 0 820 520"`）。**`DIJKSTRA_DATA` 新增節點時，這裡也要加**，否則那個節點和連到它的線不會畫出來：
+鄰接表裡沒有座標，所以節點位置另外存在 `NODE_POSITIONS`（SVG 座標，不是螢幕像素；GraphCanvas 的 viewBox 會依這些座標自動算出來）。**`DIJKSTRA_DATA` 新增節點時，這裡也要加**，否則那個節點和連到它的線不會畫出來：
 
 | 節點 | x | y |
 | --- | --- | --- |
@@ -72,7 +74,7 @@ DIJKSTRA_DATA（鄰接表，每條邊寫兩次）
 - 起點 `DEFAULT_START = 'A'`、終點 `DEFAULT_END = 'G'`
 - 頁面只會把 `data` 整個換成新物件，不會去改 `DIJKSTRA_DATA` 本身
 
-⚠️ 節點半徑 34，節點座標離 viewBox 邊界至少要 40 左右，圓圈才不會被切掉。
+viewBox 會貼齊所有節點、四邊各留 `VIEW_MARGIN`，所以座標不用顧慮邊界，整張圖平移也沒差。要注意的是**節點之間的距離**：目前最短的邊（B-C）長 186，節點半徑（手機 48）放太大時相鄰節點會碰在一起。
 
 ## 演算法：`dijkstra(data, startNode, endNode, onStep?)`
 
@@ -178,7 +180,7 @@ function dijkstra(data, startNode, endNode) {                            // 1
 
 ## 步驟產生器：`createDijkstraSteps(data, start, end)`
 
-先用 `toEdges(data)` 整理出邊清單（每張快照都要用它決定邊的顏色），再呼叫 `dijkstra(data, start, end, onStep)`，每收到一個事件就用當下的 `table` / `visited` / `queue` 產生一個快照。搜尋結束後，再補上**回推最短路徑**的步驟。步驟本身不需要節點座標，座標只有畫面（GraphChart）用得到。
+先用 `toEdges(data)` 整理出邊清單（每張快照都要用它決定邊的顏色），再呼叫 `dijkstra(data, start, end, onStep)`，每收到一個事件就用當下的 `table` / `visited` / `queue` 產生一個快照。搜尋結束後，再補上**回推最短路徑**的步驟。步驟本身不需要節點座標，座標只有畫面（GraphCanvas）用得到。
 
 | 事件 | Phase | 標籤 | 時機 | 高亮行 |
 | --- | --- | --- | --- | --- |
@@ -272,9 +274,19 @@ current → checking 的邊  → checking  （amber）
 
 搜尋過程中完全不會出現 lime。lime 只在最後回推路徑時出現，代表「這就是答案」。
 
-## GraphChart 元件
+## GraphChart / GraphCanvas 元件
 
-取代排序頁 `BarChart` 的位置，標題列與下方說明框的樣式和 BarChart 相同，中間改成 SVG 圖（`viewBox="0 0 820 520"`，寬度隨容器縮放）。
+分成兩層：
+
+```
+GraphChart（外框：標題列、說明框）
+  └─ GraphCanvas（SVG 圖本體：節點、邊、權重）
+```
+
+- **GraphChart** 取代排序頁 `BarChart` 的位置，標題列與下方說明框的樣式和 BarChart 相同，樣式在 `GraphChart.scss`
+- **GraphCanvas** 只負責畫圖，樣式在 `GraphCanvas.scss`。首頁與演算法庫的卡片預覽也直接用它（`compact` 模式）
+
+GraphChart 的 props（`graph`、`nodeStates`、`checkingNode`、`edgeStates` 會原封不動傳給 GraphCanvas）：
 
 | Prop | 型別 | 說明 |
 | --- | --- | --- |
@@ -287,8 +299,20 @@ current → checking 的邊  → checking  （amber）
 | `currentStep` | `number` | 說明框左側的步驟編號 |
 | `message` | `string` | 說明框文字，支援 `\n` 換行 |
 
-- 節點半徑 34，只畫圓圈、節點名稱、線與權重，**不顯示節點的距離**（距離的變化看左側與下方說明）
+GraphCanvas 另外有 `compact`：隱藏節點名稱與權重、線條加粗，給卡片預覽等小尺寸使用。
+
+GraphCanvas 的尺寸常數：
+
+| 常數 | 值 | 說明 |
+| --- | --- | --- |
+| `NODE_RADIUS` | `40` | 節點半徑（手機版在 SCSS 用 CSS 的 `r` 放大到 48） |
+| `VIEW_MARGIN` | `56` | viewBox 四邊預留的空間，要大於手機版節點半徑 + 外框線寬 |
+| `LABEL_OFFSET` | `22` | 權重標籤離邊的距離 |
+
+- **viewBox 依節點座標自動計算**：貼齊所有節點、四邊各留 `VIEW_MARGIN`，所以上下左右留白一致，圖也能放到最大。SVG 會等比例縮放到容器寬度
+- 只畫圓圈、節點名稱、線與權重，**不顯示節點的距離**（距離的變化看左側與下方說明）
 - 元件只負責畫，**不知道演算法**，之後其他圖論演算法（BFS、Prim…）可以直接沿用，只要產生自己的 `nodeStates` / `edgeStates`
+- 手機版的尺寸與怎麼調整圖的大小，見 [mobile-layout.md](./mobile-layout.md)
 
 ## 顏色規則
 
@@ -308,11 +332,13 @@ current → checking 的邊  → checking  （amber）
 說明：
 
 - 實心的節點（current / queued / visited / path）字都改成 `$canvas`，在亮色底上才看得清楚
-- `.graph-chart__node--checking` 寫在 SCSS 節點區塊的最後，才能蓋過填色規則裡的 `stroke`
+- `.graph-canvas__node--checking` 寫在 SCSS 節點區塊的最後，才能蓋過填色規則裡的 `stroke`
 - 「有更新」和「沒更新」用同一個 amber，差別看左側與下方說明
 - 左欄圖例 5 項全部列出：目前節點、檢查中的鄰居、等待中（queue）、已確認、最短路徑
-- 有顏色的邊（path / checking）在 GraphChart 裡會排序到最後才畫（`sortedEdges`），避免被灰色的邊蓋住
-- 權重標籤畫在邊的中點，沿法向量偏移 14px；法向量統一朝上，標籤不會一條在上、一條在下
+- 有顏色的邊（path / checking）在 GraphCanvas 裡會排序到最後才畫（`sortedEdges`），避免被灰色的邊蓋住
+- 權重標籤畫在邊的中點，沿法向量偏移 `LABEL_OFFSET`（22）；法向量統一朝上，標籤不會一條在上、一條在下
+- 權重數字有一圈 `$surface` 色的描邊（`paint-order: stroke`），壓到線時仍看得清楚。**圖表區背景色改了，描邊顏色也要跟著改**
+- 表格裡的線寬是桌機的值，手機版會加粗（見 [mobile-layout.md](./mobile-layout.md)）
 
 ## 共用程式碼的調整
 
@@ -421,6 +447,5 @@ root class 為 `.dijkstra-page`（樣式內容與排序頁相同）。路由是 
 
 - 讓使用者選擇起點 / 終點（目前固定 A → G），或點擊節點切換終點
 - 「產生新資料」只換權重，之後可以做隨機連線（需確保連通、邊不要交錯太多）
-- 單向圖：table 要改成連鄰居一起收集，`toEdges` 不能再把 A→B、B→A 合併，GraphChart 的邊要加箭頭
+- 單向圖：table 要改成連鄰居一起收集，`toEdges` 不能再把 A→B、B→A 合併，GraphCanvas 的邊要加箭頭
 - 顯示 queue 目前的內容與 distance table
-- 手機版版面（與排序頁共用的待辦）
