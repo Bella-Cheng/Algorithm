@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+import { useToastManager } from 'reka-ui'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title?: string
     /** 標題下方的說明，如 設定資料範圍後套用至氣泡排序。 */
@@ -14,6 +15,8 @@ withDefaults(
     hint?: string
     confirmText?: string
     cancelText?: string
+    /** 按下套用後跳出的 toast 文字 */
+    toastText?: string
   }>(),
   {
     title: '產生新資料',
@@ -23,6 +26,7 @@ withDefaults(
     hint: '',
     confirmText: '產生並套用',
     cancelText: '取消',
+    toastText: '已套用新資料',
   },
 )
 
@@ -41,6 +45,7 @@ defineSlots<{
 
 const titleId = useId()
 const dialogRef = ref<HTMLElement>()
+const toast = useToastManager()
 
 function close() {
   open.value = false
@@ -49,6 +54,7 @@ function close() {
 function confirm() {
   emit('confirm')
   close()
+  toast.add({ title: props.toastText })
 }
 
 function onKeydown(event: KeyboardEvent) {

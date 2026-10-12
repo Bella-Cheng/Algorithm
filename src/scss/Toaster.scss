@@ -1,0 +1,140 @@
+// 全站 toast（置頂置中）
+// ToastPortal 會把 viewport 搬到 body，Reka UI 不會把 scoped 屬性帶過去，所以這個檔案不加 scoped
+.toaster {
+  position: fixed;
+  z-index: 120; // 要蓋過 DataModal（100）與 SelectMenu（110）
+  top: 46px;
+  left: 50%;
+  display: flex;
+  // 寬度跟著文字長度走，最多 360px，手機上左右各留 16px
+  width: max-content;
+  max-width: min(360px, calc(100vw - 32px));
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+  transform: translateX(-50%);
+
+  &__toast {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-radius: $radius-md;
+    background: $accent-lime;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+
+    &[data-state='open'] {
+      animation: toast-in 200ms ease;
+    }
+
+    &[data-state='closed'] {
+      animation: toast-out 160ms ease forwards;
+    }
+
+    // 往上滑可以關閉
+    &[data-swipe='move'] {
+      transform: translateY(var(--reka-toast-swipe-move-y));
+    }
+
+    &[data-swipe='cancel'] {
+      transform: translateY(0);
+      transition: transform 160ms ease;
+    }
+
+    &[data-swipe='end'] {
+      animation: toast-swipe-out 160ms ease forwards;
+    }
+  }
+
+  &__body {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__title {
+    color: $canvas;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &__description {
+    color: rgba($canvas, 0.6);
+    font-family: $font-mono;
+    font-size: 12px;
+  }
+
+  &__close {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba($canvas, 0.5);
+    font-size: 13px;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+
+    &:hover {
+      background: rgba($canvas, 0.06);
+      color: $canvas;
+    }
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes toast-swipe-out {
+  from {
+    transform: translateY(var(--reka-toast-swipe-end-y));
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .toaster {
+    top: 12px;
+
+    &__toast {
+      padding: 8px 10px;
+      border-radius: $radius-sm;
+    }
+
+    &__title {
+      font-size: 13px;
+    }
+
+    &__close {
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+    }
+  }
+}

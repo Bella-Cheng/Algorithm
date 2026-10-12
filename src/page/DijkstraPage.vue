@@ -6,6 +6,7 @@ import GraphChart from '@/component/GraphChart.vue'
 import InputPanel from '@/component/InputPanel.vue'
 import CodePanel from '@/component/CodePanel.vue'
 import { computed, ref } from 'vue'
+import { useToastManager } from 'reka-ui'
 import {
   DEFAULT_END,
   DEFAULT_START,
@@ -64,10 +65,13 @@ const stepLabel = computed(
     `${DIJKSTRA_PHASE_LABEL[step.value.phase]}  ${step.value.focus}  /  ${padNumber(step.value.visitedCount)}`,
 )
 
+const toast = useToastManager()
+
 /** 重新產生邊的權重，並把步驟歸 0 */
 function regenerate() {
   reset()
   data.value = createRandomData()
+  toast.add({ title: '已產生新的權重' })
 }
 </script>
 
