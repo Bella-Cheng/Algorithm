@@ -47,6 +47,12 @@ onBeforeUnmount(() => clearTimeout(heroTimer))
 
 const moduleCount = padNumber(MODULES.length)
 const dijkstraPreview = createDijkstraPreview()
+
+const modulesSection = ref<HTMLElement>()
+
+function scrollToModules() {
+  modulesSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
@@ -58,8 +64,8 @@ const dijkstraPreview = createDijkstraPreview()
         <p class="home__lead">把抽象的演算法，轉化成可暫停、可拆解、可親手操控的視覺體驗。</p>
         <div class="home__actions">
           <RouterLink to="/Library" class="home__btn home__btn--primary">進入工作台</RouterLink>
-          <!-- 原生錨點：瀏覽器會自己捲動 .main-layout__content 到卡片區 -->
-          <a href="#modules" class="home__btn">了解方法</a>
+          <!-- Hash 路由模式下 #modules 會被當成路由，所以改用 scrollIntoView 手動捲動 -->
+          <a href="#modules" class="home__btn" @click.prevent="scrollToModules">了解方法</a>
         </div>
       </div>
 
@@ -79,7 +85,7 @@ const dijkstraPreview = createDijkstraPreview()
       </div>
     </section>
 
-    <section id="modules" class="home__modules">
+    <section id="modules" ref="modulesSection" class="home__modules">
       <div class="home__modules-header">
         <h2 class="home__modules-title">選一個演算法，開始拆解</h2>
         <span class="home__modules-count">{{ moduleCount }} MODULES</span>
