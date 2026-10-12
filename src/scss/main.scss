@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;700&display=swap");
+// Material Symbols 只載入用到的圖示，新增圖示時要把名稱加進 icon_names（需依字母排序）
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&icon_names=keyboard_arrow_left,keyboard_arrow_right,pause,play_arrow,replay&display=block");
 
 :root {
   color-scheme: dark; //瀏覽器原生深色樣式

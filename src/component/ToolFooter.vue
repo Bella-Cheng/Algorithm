@@ -48,7 +48,7 @@ const speedModel = computed({
   <footer class="tool-footer">
     <div class="tool-footer__controls">
       <button type="button" class="tool-footer__icon-btn" aria-label="重置" @click="$emit('reset')">
-        ↺
+        <span class="material-symbols-outlined tool-footer__icon" aria-hidden="true">replay</span>
       </button>
       <button
         type="button"
@@ -57,10 +57,13 @@ const speedModel = computed({
         :disabled="currentStep <= 0"
         @click="$emit('prev')"
       >
-        ‹
+        <!-- prettier-ignore -->
+        <span class="material-symbols-outlined tool-footer__icon" aria-hidden="true">keyboard_arrow_left</span>
       </button>
       <button type="button" class="tool-footer__play-btn" @click="$emit('togglePlay')">
-        <span class="tool-footer__play-icon">{{ isPlaying ? '❚❚' : '▶' }}</span>
+        <span class="material-symbols-outlined tool-footer__play-icon" aria-hidden="true">{{
+          isPlaying ? 'pause' : 'play_arrow'
+        }}</span>
         {{ isPlaying ? '暫停' : '執行' }}
       </button>
       <button
@@ -70,7 +73,8 @@ const speedModel = computed({
         :disabled="currentStep >= totalSteps"
         @click="$emit('next')"
       >
-        ›
+        <!-- prettier-ignore -->
+        <span class="material-symbols-outlined tool-footer__icon" aria-hidden="true">keyboard_arrow_right</span>
       </button>
     </div>
 

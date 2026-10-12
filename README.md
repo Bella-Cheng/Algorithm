@@ -2,7 +2,8 @@
 
 逐步視覺化演算法執行過程的互動式學習平台。每個演算法都會先把所有步驟算好，再透過播放器一步步呈現，並同步高亮對應的程式碼行。
 
-🔗 線上版：<https://bella-cheng.github.io/Algorithm/>
+- ALGO ATELIER 網站：<https://bella-cheng.github.io/Algorithm/>
+- iThome 鐵人賽：<https://ithelp.ithome.com.tw/users/20184088/ironman/9625>
 
 ## 功能
 
