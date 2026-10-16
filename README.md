@@ -25,7 +25,6 @@
 - [Vue 3](https://vuejs.org/)（`<script setup>` + TypeScript）
 - [Vite](https://vite.dev/)
 - [Vue Router](https://router.vuejs.org/)（Hash 模式）
-- [Pinia](https://pinia.vuejs.org/)
 - [Reka UI](https://reka-ui.com/)
 - SCSS
 
